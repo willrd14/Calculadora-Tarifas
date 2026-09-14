@@ -5,6 +5,41 @@ Contexto de proyecto para Claude Code. Ver el plan completo en
 
 ## Estado actual
 
+**Fase 3 — Historial de cotizaciones: completa.**
+
+- Persistencia: **SQLite vía `tauri-plugin-sql`** (decisión explícita de
+  Williams sobre la alternativa más simple de `tauri-plugin-store`/JSON que
+  sugería el PRD — pensando en poder filtrar/ordenar el historial más
+  adelante).
+- `src-tauri/src/lib.rs`: registra el plugin con una migración (`version:
+  1`) que crea la tabla `quotes` (un registro por cotización generada, con
+  `items`/`additional_charges` serializados como JSON en columnas TEXT).
+  DB en `sqlite:cotizaciones.db` (resuelto por el plugin dentro del
+  directorio de datos de la app, no en `Documentos`).
+- `src-tauri/capabilities/default.json`: se agregan `sql:default` +
+  `sql:allow-execute` (el default del plugin solo trae lectura/`load`/
+  `close`, hace falta `allow-execute` aparte para INSERT/UPDATE).
+- `src/features/history/db.ts`: `saveQuoteToHistory()`,
+  `listQuoteHistory()`, `updateQuoteStatus()`,
+  `historyRecordToFormValues()` (reconstruye `QuoteFormValues` a partir de
+  un registro, para "duplicar como plantilla").
+- `src/features/history/HistoryList.tsx`: tabla del historial (cliente,
+  proyecto, fecha, total, estado editable inline, botón "Duplicar"). Estado
+  por defecto de una cotización nueva: `"Enviada"`.
+- `src/features/pdf/generateQuotePdf.tsx`: `generateAndSaveQuotePdf()` ahora
+  devuelve `{ path, quoteNumber, total }` (antes solo `path`) — `quoteNumber`
+  se usa como `id` del historial, `total` se guarda sin recalcularlo aparte.
+- `src/features/quote/QuoteForm.tsx`: tras generar el PDF, llama a
+  `saveQuoteToHistory()`. Acepta un prop `initialValues` para precargar el
+  formulario al duplicar. `db.ts` y `generateQuotePdf.tsx` se importan con
+  `import()` dinámico (code-splitting — ver nota de bundle abajo).
+- `src/app/App.tsx`: pestañas "Nueva cotización" / "Historial".
+  `HistoryList` se carga con `React.lazy` (agrupa el plugin SQL en su
+  propio chunk, separado del bundle principal). Al duplicar, cambia a la
+  pestaña de cotización y **remonta** `QuoteForm` con una `key` distinta
+  (react-hook-form solo lee `defaultValues` al montar, no reacciona a
+  cambios de prop).
+
 **Fase 2 — Exportación a PDF: completa** (incluye una revisión para
 replicar `Template/Main.dc.html`, el diseño de referencia que Williams
 agregó — ver `Template/README.md`).
@@ -115,10 +150,14 @@ formulario). Williams sí confirmó que la app en general abre y funciona.
   errores). `Cargo.lock` commiteado (es una app, no una librería).
 
 **Siguiente paso:**
-1. Correr `npm run tauri dev`, llenar el formulario y confirmar que el PDF
-   se genera y aparece en `Documentos/Cotizaciones` con el diseño esperado
-   (no se ha probado end-to-end generando un PDF real desde la app).
-2. Fase 3 — Historial de cotizaciones (persistencia local).
+1. Correr `npm run tauri dev`, generar una cotización y confirmar que
+   aparece en la pestaña Historial con el estado/total correctos, y que
+   "Duplicar" precarga bien el formulario (la Fase 3 es nueva, no se probó
+   end-to-end corriendo la app todavía).
+2. Fase 4 — Configuración (tarifa por defecto, datos del freelancer en
+   `freelancerProfile.ts`, moneda por defecto) — expondría en UI lo que hoy
+   son archivos fijos (`DEFAULT_HOURLY_RATE`, `freelancerProfile`,
+   `DEFAULT_CURRENCY` en `schema.ts`).
 
 ## Notas importantes
 

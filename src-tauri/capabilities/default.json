@@ -12,6 +12,8 @@
     {
       "identifier": "fs:scope",
       "allow": ["$DOCUMENT/**"]
-    }
+    },
+    "sql:default",
+    "sql:allow-execute"
   ]
 }

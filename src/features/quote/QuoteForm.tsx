@@ -20,16 +20,21 @@ type PdfStatus =
   | { kind: "success"; path: string }
   | { kind: "error"; message: string };
 
+interface QuoteFormProps {
+  /** Valores iniciales al duplicar una cotización del historial. */
+  initialValues?: QuoteFormInput;
+}
+
 /**
  * Formulario de cotización: cliente/proyecto, ítems, tarifa, cargos
  * adicionales, descuento y condiciones, con vista previa del total en
- * tiempo real. Al enviarlo, genera el PDF y lo guarda en
- * `Documentos/Cotizaciones`.
+ * tiempo real. Al enviarlo, genera el PDF, lo guarda en
+ * `Documentos/Cotizaciones` y registra la cotización en el historial.
  */
-export function QuoteForm() {
+export function QuoteForm({ initialValues }: QuoteFormProps) {
   const form = useForm<QuoteFormInput, unknown, QuoteFormValues>({
     resolver: zodResolver(quoteFormSchema),
-    defaultValues: defaultQuoteFormValues,
+    defaultValues: initialValues ?? defaultQuoteFormValues,
     mode: "onBlur",
   });
 
@@ -44,10 +49,16 @@ export function QuoteForm() {
   async function onSubmit(values: QuoteFormValues) {
     setPdfStatus({ kind: "generating" });
     try {
-      // Carga diferida: @react-pdf/renderer es pesado, así que solo se
-      // descarga cuando el usuario realmente genera un PDF.
-      const { generateAndSaveQuotePdf } = await import("../pdf/generateQuotePdf");
-      const path = await generateAndSaveQuotePdf(values);
+      // Carga diferida: @react-pdf/renderer y el plugin SQL son pesados, así
+      // que solo se descargan cuando el usuario realmente genera un PDF.
+      const [{ generateAndSaveQuotePdf }, { saveQuoteToHistory }] =
+        await Promise.all([
+          import("../pdf/generateQuotePdf"),
+          import("../history/db"),
+        ]);
+      const { path, quoteNumber, total } =
+        await generateAndSaveQuotePdf(values);
+      await saveQuoteToHistory({ id: quoteNumber, quote: values, total, pdfPath: path });
       setPdfStatus({ kind: "success", path });
     } catch (error) {
       console.error("Error generando el PDF:", error);

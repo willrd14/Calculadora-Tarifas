@@ -1,6 +1,7 @@
 import { pdf } from "@react-pdf/renderer";
 import { documentDir, join } from "@tauri-apps/api/path";
 import { exists, mkdir, writeFile } from "@tauri-apps/plugin-fs";
+import { calculateQuote } from "../../lib/calculate";
 import { generateQuoteNumber } from "../../lib/quoteNumber";
 import { freelancerProfile } from "../settings/freelancerProfile";
 import type { QuoteFormValues } from "../quote/schema";
@@ -15,13 +16,22 @@ function sanitizeFileNamePart(value: string): string {
   return cleaned || "cotizacion";
 }
 
+export interface GeneratedQuotePdf {
+  /** Ruta completa del PDF guardado. */
+  path: string;
+  /** Número de cotización usado en el PDF — también sirve como id del historial. */
+  quoteNumber: string;
+  /** Total calculado, para guardarlo en el historial sin recalcularlo aparte. */
+  total: number;
+}
+
 /**
  * Genera el PDF de la cotización y lo guarda en `Documentos/Cotizaciones`
- * (crea la carpeta si no existe). Devuelve la ruta completa del archivo.
+ * (crea la carpeta si no existe).
  */
 export async function generateAndSaveQuotePdf(
   quote: QuoteFormValues,
-): Promise<string> {
+): Promise<GeneratedQuotePdf> {
   const date = new Date();
   const quoteNumber = generateQuoteNumber(date);
 
@@ -45,5 +55,12 @@ export async function generateAndSaveQuotePdf(
   const bytes = new Uint8Array(await blob.arrayBuffer());
   await writeFile(filePath, bytes);
 
-  return filePath;
+  const { total } = calculateQuote({
+    items: quote.items,
+    hourlyRate: quote.hourlyRate,
+    additionalCharges: quote.additionalCharges,
+    discountPercent: quote.discountPercent,
+  });
+
+  return { path: filePath, quoteNumber, total };
 }
