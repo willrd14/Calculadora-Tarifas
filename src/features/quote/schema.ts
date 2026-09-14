@@ -7,8 +7,15 @@ import {
 
 export const PROJECT_TYPES = [
   "Web",
+  "Web App",
+  "App Móvil",
   "Escritorio",
   "Web + Escritorio",
+  "SaaS",
+  "E-commerce",
+  "CRM",
+  "API / Integración",
+  "Automatización",
   "IA",
   "Otro",
 ] as const;
