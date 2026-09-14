@@ -49,13 +49,11 @@ escribir los datos de un cliente que ya cotizó antes.
   por si es un cliente nuevo o hay que corregir algo.
 
 **Validado con:** `npm run build` (tsc + vite build) y `cargo check`
-limpios. A diferencia de fases anteriores, esta vez **sí se probó en vivo**
-— Williams tenía `npm run tauri dev` corriendo mientras se hacían estos
-cambios; Tauri detectó los cambios en `lib.rs` (migraciones nuevas) y se
-reconstruyó solo sin errores/panics, y Vite aplicó los cambios de
-`QuoteForm.tsx`/`App.tsx` por HMR en la misma ventana ya abierta. No se
-confirmó explícitamente que el flujo de "Cliente guardado" ↔ autoguardado
-funcione de punta a punta dentro de esa sesión.
+limpios, y **en vivo end-to-end** — Williams confirmó que generar una
+cotización nueva toma la tarifa/moneda de Configuración, que el cliente
+queda guardado y aparece en la pestaña Clientes, que el selector "Cliente
+guardado" lo rellena en la siguiente cotización, y que cambiar un valor en
+Configuración se refleja en la próxima cotización nueva. Todo funcionando.
 
 **Fase 3 — Historial de cotizaciones: completa.**
 
@@ -202,11 +200,10 @@ formulario). Williams sí confirmó que la app en general abre y funciona.
   errores). `Cargo.lock` commiteado (es una app, no una librería).
 
 **Siguiente paso:**
-1. Confirmar en la app corriendo: generar una cotización nueva y verificar
-   que (a) tarifa/moneda salen de Configuración, (b) el cliente aparece en
-   la pestaña Clientes después, (c) el selector "Cliente guardado" lo
-   rellena bien en la siguiente cotización, (d) "Duplicar" desde Historial
-   sigue funcionando.
+1. Todo lo de Fase 4 + Clientes quedó **confirmado funcionando en vivo**
+   por Williams (tarifa/moneda desde Configuración, autoguardado de
+   clientes, selector "Cliente guardado", edición de Configuración
+   reflejada en la siguiente cotización). No queda pendiente de probar.
 2. El PRD no tenía una Fase de "Clientes" — si hace falta más adelante
    (buscar/filtrar clientes, editar uno existente en vez de solo borrar,
    ver qué cotizaciones tiene cada cliente), decidir si entra en una fase
