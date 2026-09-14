@@ -9,6 +9,7 @@ export const PROJECT_TYPES = [
   "Web",
   "Escritorio",
   "Web + Escritorio",
+  "IA",
   "Otro",
 ] as const;
 export type ProjectType = (typeof PROJECT_TYPES)[number];
