@@ -6,13 +6,13 @@ export interface FreelancerProfile {
 }
 
 /**
- * Datos del freelancer que aparecen en el PDF. Es un placeholder hasta que
- * exista la pantalla de Configuración (Fase 4) — edita estos valores a mano
- * mientras tanto, o reemplaza este archivo cuando se construya esa fase.
+ * Datos del freelancer que aparecen en el PDF. Están fijos aquí hasta que
+ * exista la pantalla de Configuración (Fase 4) — edítalos a mano mientras
+ * tanto, o reemplaza este archivo cuando se construya esa fase.
  */
 export const freelancerProfile: FreelancerProfile = {
-  name: "Williams",
-  email: "",
-  phone: "",
-  portfolio: "",
+  name: "Williams Rafael Villavizar Hernandez",
+  email: "williamsvillavizar204@gmail.com",
+  phone: "849-653-1360",
+  portfolio: "portafolio.w-tech.uk",
 };
