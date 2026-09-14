@@ -1,5 +1,9 @@
 import { z } from "zod";
 import type { Currency } from "../../lib/currency";
+import {
+  DEFAULT_ESTIMATED_DELIVERY,
+  DEFAULT_PAYMENT_TERMS,
+} from "../pdf/quoteConditions";
 
 export const PROJECT_TYPES = [
   "Web",
@@ -39,7 +43,9 @@ export const additionalChargeSchema = z.object({
 });
 
 export const quoteFormSchema = z.object({
-  clientName: z.string().min(1, "Ingresa el cliente o proyecto"),
+  clientName: z.string().min(1, "Ingresa el cliente o la empresa"),
+  clientContact: z.string(),
+  projectName: z.string().min(1, "Ingresa el nombre del proyecto"),
   projectType: z.enum(PROJECT_TYPES),
   description: z.string(),
   items: z.array(quoteItemSchema).min(1, "Agrega al menos una funcionalidad"),
@@ -47,6 +53,8 @@ export const quoteFormSchema = z.object({
   additionalCharges: z.array(additionalChargeSchema),
   discountPercent: z.coerce.number().min(0, "No puede ser negativo").max(100, "Máximo 100%"),
   currency: z.enum(["DOP", "USD"]),
+  paymentTerms: z.string(),
+  estimatedDelivery: z.string(),
 });
 
 // z.coerce.number() makes the schema's input type differ from its output type
@@ -70,6 +78,8 @@ export const emptyAdditionalCharge: QuoteFormValues["additionalCharges"][number]
 
 export const defaultQuoteFormValues: QuoteFormInput = {
   clientName: "",
+  clientContact: "",
+  projectName: "",
   projectType: "Web",
   description: "",
   items: [emptyQuoteItem],
@@ -77,4 +87,6 @@ export const defaultQuoteFormValues: QuoteFormInput = {
   additionalCharges: [],
   discountPercent: 0,
   currency: DEFAULT_CURRENCY,
+  paymentTerms: DEFAULT_PAYMENT_TERMS,
+  estimatedDelivery: DEFAULT_ESTIMATED_DELIVERY,
 };

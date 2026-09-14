@@ -1,19 +1,27 @@
 import { pdf } from "@react-pdf/renderer";
-import { save } from "@tauri-apps/plugin-dialog";
-import { writeFile } from "@tauri-apps/plugin-fs";
+import { documentDir, join } from "@tauri-apps/api/path";
+import { exists, mkdir, writeFile } from "@tauri-apps/plugin-fs";
 import { generateQuoteNumber } from "../../lib/quoteNumber";
 import { freelancerProfile } from "../settings/freelancerProfile";
 import type { QuoteFormValues } from "../quote/schema";
 import { QuoteDocument } from "./QuoteDocument";
 
+/** Subcarpeta dentro de "Documentos" donde se guarda cada cotización. */
+const QUOTES_SUBFOLDER = "Cotizaciones";
+
+/** Reemplaza caracteres inválidos en nombres de archivo de Windows. */
+function sanitizeFileNamePart(value: string): string {
+  const cleaned = value.trim().replace(/[\\/:*?"<>|]+/g, "-");
+  return cleaned || "cotizacion";
+}
+
 /**
- * Genera el PDF de la cotización y abre el diálogo nativo de "Guardar como"
- * para que el usuario elija la carpeta local. Devuelve la ruta guardada, o
- * `null` si el usuario canceló el diálogo.
+ * Genera el PDF de la cotización y lo guarda en `Documentos/Cotizaciones`
+ * (crea la carpeta si no existe). Devuelve la ruta completa del archivo.
  */
 export async function generateAndSaveQuotePdf(
   quote: QuoteFormValues,
-): Promise<string | null> {
+): Promise<string> {
   const date = new Date();
   const quoteNumber = generateQuoteNumber(date);
 
@@ -26,15 +34,13 @@ export async function generateAndSaveQuotePdf(
     />,
   ).toBlob();
 
-  const clientSlug = quote.clientName.trim() || "cotizacion";
-  const filePath = await save({
-    defaultPath: `${quoteNumber} - ${clientSlug}.pdf`,
-    filters: [{ name: "PDF", extensions: ["pdf"] }],
-  });
-
-  if (!filePath) {
-    return null;
+  const quotesDir = await join(await documentDir(), QUOTES_SUBFOLDER);
+  if (!(await exists(quotesDir))) {
+    await mkdir(quotesDir, { recursive: true });
   }
+
+  const fileName = `${quoteNumber} - ${sanitizeFileNamePart(quote.clientName)}.pdf`;
+  const filePath = await join(quotesDir, fileName);
 
   const bytes = new Uint8Array(await blob.arrayBuffer());
   await writeFile(filePath, bytes);

@@ -21,9 +21,10 @@ type PdfStatus =
   | { kind: "error"; message: string };
 
 /**
- * Formulario de cotización: datos del proyecto, ítems, tarifa, cargos
- * adicionales y descuento, con vista previa del total en tiempo real.
- * Al enviarlo, genera el PDF y abre el diálogo nativo para guardarlo.
+ * Formulario de cotización: cliente/proyecto, ítems, tarifa, cargos
+ * adicionales, descuento y condiciones, con vista previa del total en
+ * tiempo real. Al enviarlo, genera el PDF y lo guarda en
+ * `Documentos/Cotizaciones`.
  */
 export function QuoteForm() {
   const form = useForm<QuoteFormInput, unknown, QuoteFormValues>({
@@ -47,7 +48,7 @@ export function QuoteForm() {
       // descarga cuando el usuario realmente genera un PDF.
       const { generateAndSaveQuotePdf } = await import("../pdf/generateQuotePdf");
       const path = await generateAndSaveQuotePdf(values);
-      setPdfStatus(path ? { kind: "success", path } : { kind: "idle" });
+      setPdfStatus({ kind: "success", path });
     } catch (error) {
       console.error("Error generando el PDF:", error);
       setPdfStatus({
@@ -66,15 +67,37 @@ export function QuoteForm() {
         <div className="space-y-6">
           <section className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <FormField
-              label="Cliente / Proyecto"
+              label="Cliente / Empresa"
               htmlFor="clientName"
               error={errors.clientName?.message}
             >
               <input
                 id="clientName"
                 className={inputClassName}
-                placeholder="Ej. Acme Corp — App de inventario"
+                placeholder="Ej. Acme Corp"
                 {...register("clientName")}
+              />
+            </FormField>
+
+            <FormField label="Contacto del cliente" htmlFor="clientContact">
+              <input
+                id="clientContact"
+                className={inputClassName}
+                placeholder="Email o teléfono (opcional)"
+                {...register("clientContact")}
+              />
+            </FormField>
+
+            <FormField
+              label="Nombre del proyecto"
+              htmlFor="projectName"
+              error={errors.projectName?.message}
+            >
+              <input
+                id="projectName"
+                className={inputClassName}
+                placeholder="Ej. App de inventario"
+                {...register("projectName")}
               />
             </FormField>
 
@@ -157,6 +180,26 @@ export function QuoteForm() {
           </section>
 
           <AdditionalChargesField />
+
+          <section className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <FormField label="Forma de pago" htmlFor="paymentTerms">
+              <input
+                id="paymentTerms"
+                className={inputClassName}
+                placeholder="Ej. 50% al iniciar, 50% contra entrega"
+                {...register("paymentTerms")}
+              />
+            </FormField>
+
+            <FormField label="Tiempo estimado de entrega" htmlFor="estimatedDelivery">
+              <input
+                id="estimatedDelivery"
+                className={inputClassName}
+                placeholder="Ej. 3–4 semanas desde el inicio"
+                {...register("estimatedDelivery")}
+              />
+            </FormField>
+          </section>
 
           <div className="flex items-center gap-3">
             <button

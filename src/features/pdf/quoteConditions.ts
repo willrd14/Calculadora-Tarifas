@@ -1,11 +1,6 @@
-/**
- * Condiciones estándar que se imprimen en el PDF. Placeholder editable a
- * mano; en el futuro podrían moverse a Configuración (Fase 4) si hace falta
- * personalizarlas por cotización.
- */
-export const DEFAULT_QUOTE_CONDITIONS = {
-  validity: "Esta cotización es válida por 15 días a partir de la fecha de emisión.",
-  payment:
-    "50% por adelantado para iniciar el proyecto, 50% restante contra entrega.",
-  delivery: "El tiempo de entrega estimado se confirma al iniciar el proyecto.",
-};
+/** Días de vigencia de la cotización (política fija, no varía por cotización). */
+export const QUOTE_VALIDITY_DAYS = 15;
+
+/** Forma de pago / tiempo de entrega por defecto — el usuario los edita por cotización en el formulario. */
+export const DEFAULT_PAYMENT_TERMS = "50% al iniciar, 50% contra entrega.";
+export const DEFAULT_ESTIMATED_DELIVERY = "3–4 semanas desde el inicio.";

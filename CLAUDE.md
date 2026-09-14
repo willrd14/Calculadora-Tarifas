@@ -5,39 +5,70 @@ Contexto de proyecto para Claude Code. Ver el plan completo en
 
 ## Estado actual
 
-**Fase 2 — Exportación a PDF: completa.**
+**Fase 2 — Exportación a PDF: completa** (incluye una revisión para
+replicar `Template/Main.dc.html`, el diseño de referencia que Williams
+agregó — ver `Template/README.md`).
 
-- Librería elegida: `@react-pdf/renderer` (genera el PDF con componentes
-  React, corre 100% en el frontend/WebView).
-- `src/features/pdf/QuoteDocument.tsx`: documento PDF (freelancer, cliente,
-  tabla de ítems con subtotal por fila, cargos adicionales, totales,
-  condiciones). Usa Helvetica estándar (sin fuentes embebidas) — soporta
-  tildes/ñ bien.
-- `src/features/pdf/quoteConditions.ts`: texto placeholder de condiciones
-  (validez/pago/entrega) — editar a mano si hace falta.
-- `src/features/settings/freelancerProfile.ts`: **placeholder** de los datos
-  del freelancer que salen en el PDF (nombre "Williams", resto vacío).
-  Edítalo a mano con datos reales, o reemplázalo cuando se construya
-  Configuración (Fase 4).
-- `src/lib/quoteNumber.ts`: `generateQuoteNumber()` — número simple basado en
-  fecha/hora (`COT-YYYYMMDD-HHmm`), no es consecutivo porque no hay historial
-  todavía (Fase 3).
-- `src/features/pdf/generateQuotePdf.tsx`: `generateAndSaveQuotePdf()` — arma
-  el PDF, abre el diálogo nativo "Guardar como" (`@tauri-apps/plugin-dialog`)
-  y escribe el archivo (`@tauri-apps/plugin-fs`). Se importa con `import()`
-  dinámico desde `QuoteForm.tsx` (code-splitting: el chunk pesa ~1.2MB y solo
-  se descarga cuando el usuario genera un PDF).
-- Backend Rust: se agregaron los plugins `tauri-plugin-dialog` y
-  `tauri-plugin-fs`, registrados en `src-tauri/src/lib.rs`. Permisos en
-  `src-tauri/capabilities/default.json`: `dialog:default`, `fs:default`,
-  `fs:write-files` + `fs:scope` con `allow: ["$HOME/**"]` (alcance amplio a
-  propósito — app personal de un solo usuario, el usuario elige la ruta vía
-  diálogo nativo).
-- El botón del formulario pasó de "Continuar" a "Generar PDF"; muestra la
-  ruta guardada o un error debajo del botón.
-- Validado con `npm run build` (tsc + vite build). **No** se probó
-  `cargo tauri dev`/`build` end-to-end (abre una ventana nativa) ni se generó
-  un PDF real — falta verificar el flujo completo corriendo la app.
+- Librería: `@react-pdf/renderer`, corre 100% en el frontend/WebView.
+- `src/features/pdf/QuoteDocument.tsx`: replica el diseño de
+  `Template/Main.dc.html` (barra de acento, header con datos del freelancer +
+  número/fecha/vigencia, columnas Cliente/Proyecto, caja de descripción,
+  tabla de ítems con nota de complejidad, caja de totales, condiciones a 3
+  columnas, footer). Colores/tamaños convertidos de px (96dpi, como en el
+  template) a pt (72dpi, unidad de `@react-pdf/renderer`) con factor ×0.75.
+- `src/features/pdf/fonts.ts`: registra las fuentes vía `@fontsource/*`
+  (self-hosted, sin red en runtime) — Space Grotesk 700, IBM Plex Sans
+  400/500/600, **Roboto Mono** 400/500/600 (no IBM Plex Mono — ver nota de
+  bug abajo). Usa archivos `.woff`, no `.woff2`.
+- `src/lib/date.ts`: `addDays()` / `formatDateDMY()`.
+- `src/features/pdf/quoteConditions.ts`: `QUOTE_VALIDITY_DAYS` (15, política
+  fija) y valores por defecto de forma de pago / tiempo de entrega — el
+  usuario los edita **por cotización** en el formulario (`paymentTerms`,
+  `estimatedDelivery` en el schema), no son globales.
+- `src/features/quote/schema.ts`: el campo único "Cliente / Proyecto" se
+  separó en `clientName` + `clientContact` (opcional) + `projectName` (el
+  template los muestra como dos columnas distintas).
+- `src/features/settings/freelancerProfile.ts`: datos reales de Williams ya
+  cargados (nombre completo, email, teléfono, portafolio) + `tagline` y
+  `handle` ("willrd14", para el footer). Sigue siendo un archivo fijo hasta
+  la Fase 4 (Configuración).
+- `src/lib/quoteNumber.ts`: `generateQuoteNumber()` — ahora incluye segundos
+  (`COT-YYYYMMDD-HHmmss`) para que dos PDFs generados en el mismo minuto no
+  se pisen de nombre. Sigue sin ser un consecutivo real (Fase 3).
+- `src/features/pdf/generateQuotePdf.tsx`: **ya no usa diálogo de guardado**
+  — a pedido de Williams, cada cotización se guarda automáticamente en
+  `Documentos/Cotizaciones` (resuelto con `documentDir()` de
+  `@tauri-apps/api/path`, la carpeta se crea con `mkdir` si no existe). Se
+  importa con `import()` dinámico desde `QuoteForm.tsx` (code-splitting: el
+  chunk pesa ~1.2MB, solo se descarga al generar un PDF).
+- Backend Rust: **se quitó** `tauri-plugin-dialog` (ya no se usa). Permisos
+  en `src-tauri/capabilities/default.json`: `core:default`, `opener:default`,
+  `fs:default`, `fs:write-files`, `fs:allow-mkdir`, `fs:scope` con
+  `allow: ["$DOCUMENT/**"]` (antes era `$HOME/**`; se acotó a Documentos ya
+  que ahí es donde realmente se escribe ahora).
+- El botón del formulario dice "Generar PDF"; muestra la ruta guardada o un
+  error debajo del botón.
+
+**Bug real encontrado y su fix (fuentes del PDF):** `@react-pdf/renderer`
+(pdfkit + fontkit) revienta con `RangeError: Offset is outside the bounds
+of the DataView` al incrustar IBM Plex Mono en cuanto el texto trae un
+espacio junto a ciertos glifos (ej. `"No. 001"`, `"Fecha: ..."`) — no tiene
+que ver con acentos, ni con woff-vs-woff2, ni con usar varias fuentes a la
+vez (aislado con scripts standalone, ver detalle en el commit). **Roboto
+Mono** renderiza el mismo contenido sin problema y es visualmente muy
+parecido, así que se usa en su lugar. Aparte, `.woff2` (cualquier familia)
+también revienta el subsetting — por eso todas las fuentes usan `.woff`.
+Si en el futuro se cambia de librería/fuente para el PDF, tener esto en
+cuenta.
+
+**Cómo se validó (sin poder abrir la ventana nativa en este entorno):**
+`npm run build` (tsc + vite build) y `cargo check` pasan limpios; además se
+armó un documento de ejemplo con datos realistas fuera de Vite (fuentes
+registradas con rutas de archivo locales) y se leyó el PDF resultante con
+la herramienta de lectura de PDFs de Claude Code para confirmar visualmente
+que el layout, colores y fuentes quedaron bien — pero **nunca se generó un
+PDF real desde la app corriendo** (`npm run tauri dev` + llenar el
+formulario). Williams sí confirmó que la app en general abre y funciona.
 
 **Fase 1 — MVP (formulario + cálculo + vista previa): completa.**
 
@@ -84,8 +115,9 @@ Contexto de proyecto para Claude Code. Ver el plan completo en
   errores). `Cargo.lock` commiteado (es una app, no una librería).
 
 **Siguiente paso:**
-1. Correr `npm run tauri dev` una vez para confirmar en vivo que el diálogo
-   de guardado y el PDF generado funcionan (no se ha probado end-to-end).
+1. Correr `npm run tauri dev`, llenar el formulario y confirmar que el PDF
+   se genera y aparece en `Documentos/Cotizaciones` con el diseño esperado
+   (no se ha probado end-to-end generando un PDF real desde la app).
 2. Fase 3 — Historial de cotizaciones (persistencia local).
 
 ## Notas importantes

@@ -6,12 +6,12 @@
   "permissions": [
     "core:default",
     "opener:default",
-    "dialog:default",
     "fs:default",
     "fs:write-files",
+    "fs:allow-mkdir",
     {
       "identifier": "fs:scope",
-      "allow": ["$HOME/**"]
+      "allow": ["$DOCUMENT/**"]
     }
   ]
 }
