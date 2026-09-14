@@ -5,6 +5,40 @@ Contexto de proyecto para Claude Code. Ver el plan completo en
 
 ## Estado actual
 
+**Fase 2 — Exportación a PDF: completa.**
+
+- Librería elegida: `@react-pdf/renderer` (genera el PDF con componentes
+  React, corre 100% en el frontend/WebView).
+- `src/features/pdf/QuoteDocument.tsx`: documento PDF (freelancer, cliente,
+  tabla de ítems con subtotal por fila, cargos adicionales, totales,
+  condiciones). Usa Helvetica estándar (sin fuentes embebidas) — soporta
+  tildes/ñ bien.
+- `src/features/pdf/quoteConditions.ts`: texto placeholder de condiciones
+  (validez/pago/entrega) — editar a mano si hace falta.
+- `src/features/settings/freelancerProfile.ts`: **placeholder** de los datos
+  del freelancer que salen en el PDF (nombre "Williams", resto vacío).
+  Edítalo a mano con datos reales, o reemplázalo cuando se construya
+  Configuración (Fase 4).
+- `src/lib/quoteNumber.ts`: `generateQuoteNumber()` — número simple basado en
+  fecha/hora (`COT-YYYYMMDD-HHmm`), no es consecutivo porque no hay historial
+  todavía (Fase 3).
+- `src/features/pdf/generateQuotePdf.tsx`: `generateAndSaveQuotePdf()` — arma
+  el PDF, abre el diálogo nativo "Guardar como" (`@tauri-apps/plugin-dialog`)
+  y escribe el archivo (`@tauri-apps/plugin-fs`). Se importa con `import()`
+  dinámico desde `QuoteForm.tsx` (code-splitting: el chunk pesa ~1.2MB y solo
+  se descarga cuando el usuario genera un PDF).
+- Backend Rust: se agregaron los plugins `tauri-plugin-dialog` y
+  `tauri-plugin-fs`, registrados en `src-tauri/src/lib.rs`. Permisos en
+  `src-tauri/capabilities/default.json`: `dialog:default`, `fs:default`,
+  `fs:write-files` + `fs:scope` con `allow: ["$HOME/**"]` (alcance amplio a
+  propósito — app personal de un solo usuario, el usuario elige la ruta vía
+  diálogo nativo).
+- El botón del formulario pasó de "Continuar" a "Generar PDF"; muestra la
+  ruta guardada o un error debajo del botón.
+- Validado con `npm run build` (tsc + vite build). **No** se probó
+  `cargo tauri dev`/`build` end-to-end (abre una ventana nativa) ni se generó
+  un PDF real — falta verificar el flujo completo corriendo la app.
+
 **Fase 1 — MVP (formulario + cálculo + vista previa): completa.**
 
 - `src/features/quote/schema.ts`: esquema zod (`quoteFormSchema`), tipos y
@@ -49,8 +83,10 @@ Contexto de proyecto para Claude Code. Ver el plan completo en
 - Rust instalado y validado con `cargo check` en `src-tauri` (compila sin
   errores). `Cargo.lock` commiteado (es una app, no una librería).
 
-**Siguiente paso (Fase 2):** exportación a PDF (`src/features/pdf`), a partir
-de los `QuoteFormValues` que ya arma `onSubmit` en `QuoteForm.tsx`.
+**Siguiente paso:**
+1. Correr `npm run tauri dev` una vez para confirmar en vivo que el diálogo
+   de guardado y el PDF generado funcionan (no se ha probado end-to-end).
+2. Fase 3 — Historial de cotizaciones (persistencia local).
 
 ## Notas importantes
 

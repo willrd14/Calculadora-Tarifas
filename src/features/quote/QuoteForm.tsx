@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -13,10 +14,16 @@ import { QuoteItemsField } from "../../components/QuoteItemsField";
 import { AdditionalChargesField } from "../../components/AdditionalChargesField";
 import { QuotePreview } from "../../components/QuotePreview";
 
+type PdfStatus =
+  | { kind: "idle" }
+  | { kind: "generating" }
+  | { kind: "success"; path: string }
+  | { kind: "error"; message: string };
+
 /**
  * Formulario de cotización: datos del proyecto, ítems, tarifa, cargos
  * adicionales y descuento, con vista previa del total en tiempo real.
- * La exportación a PDF (Fase 2) todavía no está conectada al submit.
+ * Al enviarlo, genera el PDF y abre el diálogo nativo para guardarlo.
  */
 export function QuoteForm() {
   const form = useForm<QuoteFormInput, unknown, QuoteFormValues>({
@@ -31,9 +38,23 @@ export function QuoteForm() {
     formState: { errors },
   } = form;
 
-  function onSubmit(values: QuoteFormValues) {
-    // TODO(Fase 2): generar el PDF a partir de `values` en vez de loguear.
-    console.log("Cotización lista:", values);
+  const [pdfStatus, setPdfStatus] = useState<PdfStatus>({ kind: "idle" });
+
+  async function onSubmit(values: QuoteFormValues) {
+    setPdfStatus({ kind: "generating" });
+    try {
+      // Carga diferida: @react-pdf/renderer es pesado, así que solo se
+      // descarga cuando el usuario realmente genera un PDF.
+      const { generateAndSaveQuotePdf } = await import("../pdf/generateQuotePdf");
+      const path = await generateAndSaveQuotePdf(values);
+      setPdfStatus(path ? { kind: "success", path } : { kind: "idle" });
+    } catch (error) {
+      console.error("Error generando el PDF:", error);
+      setPdfStatus({
+        kind: "error",
+        message: "No se pudo generar el PDF. Intenta de nuevo.",
+      });
+    }
   }
 
   return (
@@ -137,12 +158,24 @@ export function QuoteForm() {
 
           <AdditionalChargesField />
 
-          <button
-            type="submit"
-            className="rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-700"
-          >
-            Continuar
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              type="submit"
+              disabled={pdfStatus.kind === "generating"}
+              className="rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-700 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {pdfStatus.kind === "generating" ? "Generando PDF…" : "Generar PDF"}
+            </button>
+
+            {pdfStatus.kind === "success" && (
+              <p className="text-sm text-green-700">
+                PDF guardado en: {pdfStatus.path}
+              </p>
+            )}
+            {pdfStatus.kind === "error" && (
+              <p className="text-sm text-red-600">{pdfStatus.message}</p>
+            )}
+          </div>
         </div>
 
         <QuotePreview />
