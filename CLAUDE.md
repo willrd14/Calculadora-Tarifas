@@ -5,6 +5,30 @@ Contexto de proyecto para Claude Code. Ver el plan completo en
 
 ## Estado actual
 
+**Fase 1 — MVP (formulario + cálculo + vista previa): completa.**
+
+- `src/features/quote/schema.ts`: esquema zod (`quoteFormSchema`), tipos y
+  constantes (tipos de proyecto, monedas, horas por complejidad).
+  Usa `z.coerce.number()` en los campos numéricos, por eso el formulario
+  distingue `QuoteFormInput` (lo que RHF maneja mientras se escribe) de
+  `QuoteFormValues` (lo que llega a `onSubmit` ya validado) — ver el
+  `useForm<QuoteFormInput, unknown, QuoteFormValues>` en `QuoteForm.tsx`.
+- `src/lib/calculate.ts`: `calculateQuote()`, función pura del desglose
+  (horas totales, subtotal ítems, cargos adicionales, descuento, total).
+- `src/lib/currency.ts`: `formatCurrency()` (Intl.NumberFormat DOP/USD).
+- `src/features/quote/QuoteForm.tsx`: formulario principal (cliente/proyecto,
+  tipo, descripción, tarifa/hora, moneda, descuento) + `FormProvider`.
+- `src/components/QuoteItemsField.tsx` y `AdditionalChargesField.tsx`:
+  listas dinámicas (`useFieldArray`) de ítems y cargos adicionales.
+- `src/components/QuotePreview.tsx`: desglose en tiempo real vía `useWatch` +
+  `calculateQuote`.
+- `src/components/FormField.tsx`: wrapper label+input+error reutilizable.
+- `onSubmit` de `QuoteForm` solo hace `console.log` por ahora — la Fase 2
+  (PDF) todavía no está conectada.
+- Validado con `npm run build` (tsc + vite build) y sirviendo con
+  `npm run dev`. **Nota:** no pude verificar visualmente en navegador porque
+  la extensión Claude-in-Chrome no respondió en este entorno.
+
 **Fase 0 — Setup: completa.**
 
 - Scaffold generado con `create-tauri-app` (Tauri 2 + React 19 + TS + Vite,
@@ -25,8 +49,8 @@ Contexto de proyecto para Claude Code. Ver el plan completo en
 - Rust instalado y validado con `cargo check` en `src-tauri` (compila sin
   errores). `Cargo.lock` commiteado (es una app, no una librería).
 
-**Siguiente paso (Fase 1 — MVP):** formulario de cotización + cálculo + vista
-previa en tiempo real, en `src/features/quote` + `src/components`.
+**Siguiente paso (Fase 2):** exportación a PDF (`src/features/pdf`), a partir
+de los `QuoteFormValues` que ya arma `onSubmit` en `QuoteForm.tsx`.
 
 ## Notas importantes
 
