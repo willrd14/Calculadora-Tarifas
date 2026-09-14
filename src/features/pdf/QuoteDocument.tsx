@@ -2,7 +2,7 @@ import { Document, Link, Page, StyleSheet, Text, View } from "@react-pdf/rendere
 import { calculateQuote } from "../../lib/calculate";
 import { formatCurrency } from "../../lib/currency";
 import { addDays, formatDateDMY } from "../../lib/date";
-import type { FreelancerProfile } from "../settings/freelancerProfile";
+import type { FreelancerProfile } from "../settings/db";
 import type { QuoteFormValues } from "../quote/schema";
 import { FONT_DISPLAY, FONT_MONO, FONT_SANS, registerPdfFonts } from "./fonts";
 import { QUOTE_VALIDITY_DAYS } from "./quoteConditions";

@@ -5,6 +5,58 @@ Contexto de proyecto para Claude Code. Ver el plan completo en
 
 ## Estado actual
 
+**Fase 4 — Configuración: completa** (+ funcionalidad de Clientes, pedida
+por Williams, no estaba en el PRD original).
+
+- Migración `version: 2` (`create_settings_table`) crea la tabla `settings`
+  con **una sola fila** (`id = 'default'`, app de un solo usuario) sembrada
+  con los valores que antes estaban fijos en código (tarifa/moneda por
+  defecto y los datos de `freelancerProfile.ts`, que se borró). El archivo
+  `src/features/settings/freelancerProfile.ts` ya no existe.
+- `src/features/settings/db.ts`: `getSettings()`, `saveSettings()`,
+  `settingsToFreelancerProfile()` (adapta la fila de settings al shape que
+  espera `QuoteDocument`).
+- `src/features/settings/SettingsPage.tsx`: formulario (tarifa/moneda por
+  defecto + datos del freelancer) en la pestaña "Configuración".
+- `src/features/pdf/generateQuotePdf.tsx`: ahora llama a `getSettings()`
+  para armar el `FreelancerProfile` del PDF, en vez de importar un objeto
+  fijo.
+- `src/features/quote/QuoteForm.tsx`: en una cotización **nueva** (no al
+  duplicar), carga la configuración al montar y hace `setValue` en
+  `hourlyRate`/`currency` — duplicar respeta la tarifa/moneda originales de
+  esa cotización.
+- Se movió `CURRENCIES` de `features/quote/schema.ts` a `lib/currency.ts`
+  (ya lo necesitaban quote y settings por igual).
+- Se extrajo `src/lib/db.ts` (`getDb()`, conexión SQLite compartida) desde
+  `features/history/db.ts`, para que settings y clients (ver abajo) la
+  reutilicen sin duplicar la conexión.
+
+**Clientes (fuera del PRD original, agregado a pedido):** para no volver a
+escribir los datos de un cliente que ya cotizó antes.
+
+- Migración `version: 3` (`create_clients_table`): tabla `clients`
+  (`name` con `UNIQUE`).
+- `src/features/clients/db.ts`: `listClients()`,
+  `upsertClientByName()` (inserta o actualiza el contacto si el nombre ya
+  existe — **se llama sola** después de generar cada PDF, con
+  `values.clientName`/`clientContact` de esa cotización), `addClient()`,
+  `deleteClient()`.
+- `src/features/clients/ClientsPage.tsx`: pestaña "Clientes" — formulario
+  para agregar uno a mano + tabla con botón "Eliminar".
+- `src/features/quote/QuoteForm.tsx`: selector "Cliente guardado" (solo
+  aparece si hay al menos un cliente) que rellena `clientName` +
+  `clientContact` con `setValue`. El campo de texto sigue editable debajo
+  por si es un cliente nuevo o hay que corregir algo.
+
+**Validado con:** `npm run build` (tsc + vite build) y `cargo check`
+limpios. A diferencia de fases anteriores, esta vez **sí se probó en vivo**
+— Williams tenía `npm run tauri dev` corriendo mientras se hacían estos
+cambios; Tauri detectó los cambios en `lib.rs` (migraciones nuevas) y se
+reconstruyó solo sin errores/panics, y Vite aplicó los cambios de
+`QuoteForm.tsx`/`App.tsx` por HMR en la misma ventana ya abierta. No se
+confirmó explícitamente que el flujo de "Cliente guardado" ↔ autoguardado
+funcione de punta a punta dentro de esa sesión.
+
 **Fase 3 — Historial de cotizaciones: completa.**
 
 - Persistencia: **SQLite vía `tauri-plugin-sql`** (decisión explícita de
@@ -150,14 +202,17 @@ formulario). Williams sí confirmó que la app en general abre y funciona.
   errores). `Cargo.lock` commiteado (es una app, no una librería).
 
 **Siguiente paso:**
-1. Correr `npm run tauri dev`, generar una cotización y confirmar que
-   aparece en la pestaña Historial con el estado/total correctos, y que
-   "Duplicar" precarga bien el formulario (la Fase 3 es nueva, no se probó
-   end-to-end corriendo la app todavía).
-2. Fase 4 — Configuración (tarifa por defecto, datos del freelancer en
-   `freelancerProfile.ts`, moneda por defecto) — expondría en UI lo que hoy
-   son archivos fijos (`DEFAULT_HOURLY_RATE`, `freelancerProfile`,
-   `DEFAULT_CURRENCY` en `schema.ts`).
+1. Confirmar en la app corriendo: generar una cotización nueva y verificar
+   que (a) tarifa/moneda salen de Configuración, (b) el cliente aparece en
+   la pestaña Clientes después, (c) el selector "Cliente guardado" lo
+   rellena bien en la siguiente cotización, (d) "Duplicar" desde Historial
+   sigue funcionando.
+2. El PRD no tenía una Fase de "Clientes" — si hace falta más adelante
+   (buscar/filtrar clientes, editar uno existente en vez de solo borrar,
+   ver qué cotizaciones tiene cada cliente), decidir si entra en una fase
+   nueva o se amplía sobre lo ya hecho en `features/clients/`.
+3. Fase 5 (opcional, PRD): plantillas de PDF, multi-moneda por cotización,
+   gráficas de enviadas vs. aceptadas.
 
 ## Notas importantes
 

@@ -1,4 +1,5 @@
 export type Currency = "DOP" | "USD";
+export const CURRENCIES: readonly Currency[] = ["DOP", "USD"];
 
 const CURRENCY_LOCALE: Record<Currency, string> = {
   DOP: "es-DO",

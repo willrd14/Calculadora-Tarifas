@@ -1,8 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState, type ChangeEvent } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  CURRENCIES,
   PROJECT_TYPES,
   defaultQuoteFormValues,
   quoteFormSchema,
@@ -10,9 +9,11 @@ import {
   type QuoteFormValues,
 } from "./schema";
 import { FormField, inputClassName } from "../../components/FormField";
+import { CURRENCIES } from "../../lib/currency";
 import { QuoteItemsField } from "../../components/QuoteItemsField";
 import { AdditionalChargesField } from "../../components/AdditionalChargesField";
 import { QuotePreview } from "../../components/QuotePreview";
+import type { Client } from "../clients/db";
 
 type PdfStatus =
   | { kind: "idle" }
@@ -41,24 +42,75 @@ export function QuoteForm({ initialValues }: QuoteFormProps) {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = form;
 
   const [pdfStatus, setPdfStatus] = useState<PdfStatus>({ kind: "idle" });
+  const [clients, setClients] = useState<Client[]>([]);
+
+  // Clientes guardados, para el selector "Cliente guardado" de abajo.
+  useEffect(() => {
+    let cancelled = false;
+    import("../clients/db")
+      .then(({ listClients }) => listClients())
+      .then((rows) => {
+        if (!cancelled) setClients(rows);
+      })
+      .catch((error: unknown) => {
+        console.error("Error cargando clientes:", error);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  function handleSelectClient(event: ChangeEvent<HTMLSelectElement>) {
+    const client = clients.find((c) => c.id === event.target.value);
+    if (client) {
+      setValue("clientName", client.name);
+      setValue("clientContact", client.contact);
+    }
+  }
+
+  // En una cotización nueva, precarga la tarifa/moneda de Configuración
+  // (Fase 4) en cuanto cargan — al duplicar una del historial se respeta lo
+  // que ya traía esa cotización, así que no se toca nada en ese caso.
+  useEffect(() => {
+    if (initialValues) return;
+    let cancelled = false;
+    import("../settings/db")
+      .then(({ getSettings }) => getSettings())
+      .then((settings) => {
+        if (cancelled) return;
+        setValue("hourlyRate", settings.hourlyRate);
+        setValue("currency", settings.currency);
+      })
+      .catch((error: unknown) => {
+        console.error("Error cargando la configuración:", error);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [initialValues, setValue]);
 
   async function onSubmit(values: QuoteFormValues) {
     setPdfStatus({ kind: "generating" });
     try {
       // Carga diferida: @react-pdf/renderer y el plugin SQL son pesados, así
       // que solo se descargan cuando el usuario realmente genera un PDF.
-      const [{ generateAndSaveQuotePdf }, { saveQuoteToHistory }] =
+      const [{ generateAndSaveQuotePdf }, { saveQuoteToHistory }, { upsertClientByName }] =
         await Promise.all([
           import("../pdf/generateQuotePdf"),
           import("../history/db"),
+          import("../clients/db"),
         ]);
       const { path, quoteNumber, total } =
         await generateAndSaveQuotePdf(values);
       await saveQuoteToHistory({ id: quoteNumber, quote: values, total, pdfPath: path });
+      // Guarda/actualiza el cliente para no volver a pedir sus datos la
+      // próxima vez que pida un proyecto.
+      await upsertClientByName(values.clientName, values.clientContact);
       setPdfStatus({ kind: "success", path });
     } catch (error) {
       console.error("Error generando el PDF:", error);
@@ -77,6 +129,30 @@ export function QuoteForm({ initialValues }: QuoteFormProps) {
       >
         <div className="space-y-6">
           <section className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {clients.length > 0 && (
+              <FormField
+                label="Cliente guardado"
+                htmlFor="savedClient"
+                className="sm:col-span-2"
+              >
+                <select
+                  id="savedClient"
+                  className={inputClassName}
+                  defaultValue=""
+                  onChange={handleSelectClient}
+                >
+                  <option value="">
+                    — Elegir uno guardado o escribir uno nuevo abajo —
+                  </option>
+                  {clients.map((client) => (
+                    <option key={client.id} value={client.id}>
+                      {client.name}
+                    </option>
+                  ))}
+                </select>
+              </FormField>
+            )}
+
             <FormField
               label="Cliente / Empresa"
               htmlFor="clientName"

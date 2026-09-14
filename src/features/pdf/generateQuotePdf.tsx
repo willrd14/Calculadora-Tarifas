@@ -3,7 +3,7 @@ import { documentDir, join } from "@tauri-apps/api/path";
 import { exists, mkdir, writeFile } from "@tauri-apps/plugin-fs";
 import { calculateQuote } from "../../lib/calculate";
 import { generateQuoteNumber } from "../../lib/quoteNumber";
-import { freelancerProfile } from "../settings/freelancerProfile";
+import { getSettings, settingsToFreelancerProfile } from "../settings/db";
 import type { QuoteFormValues } from "../quote/schema";
 import { QuoteDocument } from "./QuoteDocument";
 
@@ -34,11 +34,12 @@ export async function generateAndSaveQuotePdf(
 ): Promise<GeneratedQuotePdf> {
   const date = new Date();
   const quoteNumber = generateQuoteNumber(date);
+  const settings = await getSettings();
 
   const blob = await pdf(
     <QuoteDocument
       quote={quote}
-      freelancer={freelancerProfile}
+      freelancer={settingsToFreelancerProfile(settings)}
       quoteNumber={quoteNumber}
       date={date}
     />,

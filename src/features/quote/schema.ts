@@ -21,8 +21,6 @@ export const PROJECT_TYPES = [
 ] as const;
 export type ProjectType = (typeof PROJECT_TYPES)[number];
 
-export const CURRENCIES: readonly Currency[] = ["DOP", "USD"] as const;
-
 export const COMPLEXITY_LEVELS = ["Personalizado", "Baja", "Media", "Alta"] as const;
 export type ComplexityLevel = (typeof COMPLEXITY_LEVELS)[number];
 
@@ -36,6 +34,8 @@ export const COMPLEXITY_HOURS: Record<
   Alta: 20,
 };
 
+// Fallback síncrono usado solo hasta que `QuoteForm` carga la Configuración
+// guardada (`features/settings/db.ts`) y sobreescribe estos dos campos.
 export const DEFAULT_HOURLY_RATE = 25;
 export const DEFAULT_CURRENCY: Currency = "USD";
 

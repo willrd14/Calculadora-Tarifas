@@ -1,7 +1,5 @@
-import Database from "@tauri-apps/plugin-sql";
+import { getDb } from "../../lib/db";
 import type { QuoteFormValues } from "../quote/schema";
-
-const DB_URL = "sqlite:cotizaciones.db";
 
 export const QUOTE_STATUSES = ["Enviada", "Aceptada", "Rechazada"] as const;
 export type QuoteStatus = (typeof QUOTE_STATUSES)[number];
@@ -24,15 +22,6 @@ export interface QuoteHistoryRecord {
   total: number;
   pdfPath: string;
   status: QuoteStatus;
-}
-
-let dbPromise: Promise<Database> | null = null;
-
-function getDb(): Promise<Database> {
-  if (!dbPromise) {
-    dbPromise = Database.load(DB_URL);
-  }
-  return dbPromise;
 }
 
 /** Guarda una cotización recién generada en el historial. */

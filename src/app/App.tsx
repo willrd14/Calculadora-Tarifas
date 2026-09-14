@@ -10,7 +10,19 @@ const HistoryList = lazy(() =>
   })),
 );
 
-type Tab = "quote" | "history";
+const SettingsPage = lazy(() =>
+  import("../features/settings/SettingsPage").then((mod) => ({
+    default: mod.SettingsPage,
+  })),
+);
+
+const ClientsPage = lazy(() =>
+  import("../features/clients/ClientsPage").then((mod) => ({
+    default: mod.ClientsPage,
+  })),
+);
+
+type Tab = "quote" | "history" | "clients" | "settings";
 
 function App() {
   const [tab, setTab] = useState<Tab>("quote");
@@ -45,18 +57,51 @@ function App() {
             >
               Historial
             </TabButton>
+            <TabButton
+              active={tab === "clients"}
+              onClick={() => setTab("clients")}
+            >
+              Clientes
+            </TabButton>
+            <TabButton
+              active={tab === "settings"}
+              onClick={() => setTab("settings")}
+            >
+              Configuración
+            </TabButton>
           </nav>
         </header>
 
-        {tab === "quote" ? (
+        {tab === "quote" && (
           <QuoteForm key={formKey} initialValues={initialValues} />
-        ) : (
+        )}
+        {tab === "history" && (
           <Suspense
             fallback={
               <p className="text-sm text-neutral-500">Cargando historial…</p>
             }
           >
             <HistoryList onDuplicate={handleDuplicate} />
+          </Suspense>
+        )}
+        {tab === "clients" && (
+          <Suspense
+            fallback={
+              <p className="text-sm text-neutral-500">Cargando clientes…</p>
+            }
+          >
+            <ClientsPage />
+          </Suspense>
+        )}
+        {tab === "settings" && (
+          <Suspense
+            fallback={
+              <p className="text-sm text-neutral-500">
+                Cargando configuración…
+              </p>
+            }
+          >
+            <SettingsPage />
           </Suspense>
         )}
       </div>
