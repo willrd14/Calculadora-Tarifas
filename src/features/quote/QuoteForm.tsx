@@ -301,11 +301,11 @@ export function QuoteForm({ initialValues }: QuoteFormProps) {
             </div>
           </section>
 
-          <div className="flex items-center gap-4 border-t border-line pt-6">
+          <div className="flex items-center gap-4 border-t border-border pt-6">
             <button
               type="submit"
               disabled={pdfStatus.kind === "generating"}
-              className="rounded bg-accent px-5 py-2.5 text-sm font-medium text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+              className="rounded bg-accent px-5 py-2.5 text-sm font-semibold text-accent-ink hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {pdfStatus.kind === "generating" ? "Generando PDF…" : "Generar PDF"}
             </button>

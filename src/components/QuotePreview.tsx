@@ -22,46 +22,39 @@ export function QuotePreview() {
   });
 
   return (
-    <aside className="h-fit overflow-hidden rounded border border-line bg-panel lg:sticky lg:top-6">
-      <div className="h-1 bg-accent" />
-      <div className="p-5">
-        <p className="font-mono text-xs uppercase tracking-wide text-ink-faint">
-          Vista previa
+    <aside className="h-fit rounded border border-border bg-surface p-5 lg:sticky lg:top-6">
+      <p className="text-xs text-text-faint">
+        <span className="text-accent">// </span>vista previa
+      </p>
+
+      <dl className="mt-4 space-y-2 text-sm">
+        <Row label="horas_totales" value={result.totalHours.toString()} />
+        <Row
+          label="subtotal_items"
+          value={formatCurrency(result.itemsSubtotal, currency)}
+        />
+        <Row
+          label="cargos_adicionales"
+          value={formatCurrency(result.additionalChargesTotal, currency)}
+        />
+        <Row
+          label="subtotal"
+          value={formatCurrency(result.subtotal, currency)}
+        />
+        <Row
+          label={`descuento (${Number(discountPercent) || 0}%)`}
+          value={`− ${formatCurrency(result.discountAmount, currency)}`}
+        />
+      </dl>
+
+      {/* La pantalla de una calculadora: el número que de verdad importa,
+          en su propio panel oscuro, como un display LED/LCD. */}
+      <div className="mt-4 rounded border border-accent-soft bg-well p-4">
+        <p className="text-xs text-text-faint">total</p>
+        <p className="mt-1 overflow-x-auto text-3xl font-bold text-accent [text-shadow:0_0_18px_var(--color-accent-soft)]">
+          {formatCurrency(result.total, currency)}
         </p>
-
-        <dl className="mt-4 space-y-2 text-sm">
-          <Row label="Horas totales" value={result.totalHours.toString()} />
-          <Row
-            label="Subtotal ítems"
-            value={formatCurrency(result.itemsSubtotal, currency)}
-          />
-          <Row
-            label="Cargos adicionales"
-            value={formatCurrency(result.additionalChargesTotal, currency)}
-          />
-          <Row
-            label="Subtotal"
-            value={formatCurrency(result.subtotal, currency)}
-          />
-          <Row
-            label={`Descuento (${Number(discountPercent) || 0}%)`}
-            value={`− ${formatCurrency(result.discountAmount, currency)}`}
-          />
-        </dl>
-
-        <div className="mt-4 border-t border-line pt-4">
-          <div className="flex items-baseline justify-between">
-            <span className="text-sm font-semibold uppercase tracking-wide text-ink">
-              Total
-            </span>
-            <span className="font-display text-3xl font-bold text-accent">
-              {formatCurrency(result.total, currency)}
-            </span>
-          </div>
-          <p className="mt-1 text-right font-mono text-xs text-ink-faint">
-            {currency}
-          </p>
-        </div>
+        <p className="mt-1 text-xs text-text-faint">{currency}</p>
       </div>
     </aside>
   );
@@ -69,9 +62,9 @@ export function QuotePreview() {
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between text-ink-soft">
+    <div className="flex items-center justify-between text-text-soft">
       <span>{label}</span>
-      <span className="font-mono text-ink">{value}</span>
+      <span className="text-text">{value}</span>
     </div>
   );
 }

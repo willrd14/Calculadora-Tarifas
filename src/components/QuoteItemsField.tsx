@@ -28,7 +28,7 @@ export function QuoteItemsField() {
         <button
           type="button"
           onClick={() => append(emptyQuoteItem)}
-          className="rounded-full border border-line px-3 py-1 text-xs font-medium text-ink hover:border-accent hover:text-accent"
+          className="rounded-full border border-border px-3 py-1 text-xs font-medium text-text hover:border-accent hover:text-accent"
         >
           + Agregar
         </button>
@@ -46,7 +46,7 @@ export function QuoteItemsField() {
           return (
             <div
               key={field.id}
-              className="grid grid-cols-1 gap-2 rounded border border-line bg-paper p-4 sm:grid-cols-[1fr_auto_auto_auto] sm:items-start"
+              className="grid grid-cols-1 gap-2 rounded border border-border bg-well p-4 sm:grid-cols-[1fr_auto_auto_auto] sm:items-start"
             >
               <FormField
                 label="Nombre"
@@ -96,7 +96,7 @@ export function QuoteItemsField() {
                 type="button"
                 onClick={() => remove(index)}
                 disabled={fields.length === 1}
-                className="text-sm text-danger hover:opacity-75 disabled:cursor-not-allowed disabled:text-ink-faint sm:mt-6"
+                className="text-sm text-danger hover:opacity-75 disabled:cursor-not-allowed disabled:text-text-faint sm:mt-6"
               >
                 Quitar
               </button>

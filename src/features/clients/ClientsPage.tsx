@@ -64,7 +64,7 @@ export function ClientsPage() {
   }
 
   if (state.kind === "loading") {
-    return <p className="text-sm text-ink-soft">Cargando clientes…</p>;
+    return <p className="text-sm text-text-soft">Cargando clientes…</p>;
   }
 
   if (state.kind === "error") {
@@ -75,7 +75,7 @@ export function ClientsPage() {
     <div className="max-w-2xl space-y-6">
       <form
         onSubmit={handleAdd}
-        className="grid grid-cols-1 gap-4 rounded border border-line bg-paper p-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end"
+        className="grid grid-cols-1 gap-4 rounded border border-border bg-well p-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end"
       >
         <FormField label="Nombre / Empresa" htmlFor="newClientName">
           <input
@@ -100,22 +100,22 @@ export function ClientsPage() {
         <button
           type="submit"
           disabled={saving || !name.trim()}
-          className="rounded bg-accent px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+          className="rounded bg-accent px-4 py-2 text-sm font-medium text-accent-ink hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
         >
           Agregar
         </button>
       </form>
 
       {clients.length === 0 ? (
-        <p className="text-sm text-ink-soft">
+        <p className="text-sm text-text-soft">
           Todavía no tienes clientes guardados — se agregan solos cada vez
           que generas una cotización.
         </p>
       ) : (
-        <div className="overflow-x-auto rounded border border-line bg-paper">
+        <div className="overflow-x-auto rounded border border-border bg-well">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-line bg-panel text-left font-mono text-xs uppercase tracking-wide text-ink-faint">
+              <tr className="border-b border-border bg-surface text-left font-mono text-xs uppercase tracking-wide text-text-faint">
                 <th className="px-4 py-3 font-medium">Nombre</th>
                 <th className="px-4 py-3 font-medium">Contacto</th>
                 <th className="px-4 py-3" />
@@ -123,9 +123,9 @@ export function ClientsPage() {
             </thead>
             <tbody>
               {clients.map((client) => (
-                <tr key={client.id} className="border-b border-line last:border-0">
+                <tr key={client.id} className="border-b border-border last:border-0">
                   <td className="px-4 py-3">{client.name}</td>
-                  <td className="px-4 py-3 text-ink-soft">
+                  <td className="px-4 py-3 text-text-soft">
                     {client.contact || "—"}
                   </td>
                   <td className="px-4 py-3 text-right">

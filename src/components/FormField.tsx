@@ -1,16 +1,7 @@
 import type { ReactNode } from "react";
 
 export const inputClassName =
-  "w-full rounded border border-line bg-paper px-3 py-2 text-sm text-ink placeholder:text-ink-faint focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent";
-
-/** Etiqueta de sección — mismo tratamiento que las etiquetas del PDF (mayúsculas, mono, sutil). */
-export function SectionHeading({ children }: { children: ReactNode }) {
-  return (
-    <h2 className="font-mono text-xs uppercase tracking-wide text-ink-faint">
-      {children}
-    </h2>
-  );
-}
+  "w-full rounded border border-border bg-well px-3 py-2 text-sm text-text placeholder:text-text-faint focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent";
 
 interface FormFieldProps {
   label: string;
@@ -32,12 +23,22 @@ export function FormField({
     <div className={className}>
       <label
         htmlFor={htmlFor}
-        className="mb-1 block text-sm font-medium text-ink-soft"
+        className="mb-1 block text-sm text-text-soft"
       >
         {label}
       </label>
       {children}
       {error && <p className="mt-1 text-sm text-danger">{error}</p>}
     </div>
+  );
+}
+
+/** Etiqueta de sección — prefijo `//` como un comentario de código. */
+export function SectionHeading({ children }: { children: ReactNode }) {
+  return (
+    <h2 className="text-xs text-text-faint">
+      <span className="text-accent">// </span>
+      {children}
+    </h2>
   );
 }

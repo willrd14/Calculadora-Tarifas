@@ -79,7 +79,7 @@ export function SettingsPage() {
   }
 
   if (loadStatus.kind === "loading") {
-    return <p className="text-sm text-ink-soft">Cargando configuración…</p>;
+    return <p className="text-sm text-text-soft">Cargando configuración…</p>;
   }
 
   if (loadStatus.kind === "error") {
@@ -90,7 +90,7 @@ export function SettingsPage() {
     <form onSubmit={handleSubmit(onSubmit)} className="max-w-2xl space-y-8">
       <section className="space-y-4">
         <SectionHeading>Tarifa y moneda por defecto</SectionHeading>
-        <div className="grid grid-cols-1 gap-4 rounded border border-line bg-paper p-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 rounded border border-border bg-well p-4 sm:grid-cols-2">
         <FormField
           label="Tarifa por hora por defecto"
           htmlFor="hourlyRate"
@@ -125,7 +125,7 @@ export function SettingsPage() {
       <section className="space-y-4">
         <SectionHeading>Datos del freelancer (aparecen en el PDF)</SectionHeading>
 
-        <div className="grid grid-cols-1 gap-4 rounded border border-line bg-paper p-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 rounded border border-border bg-well p-4 sm:grid-cols-2">
           <FormField
             label="Nombre completo"
             htmlFor="freelancerName"
@@ -194,11 +194,11 @@ export function SettingsPage() {
         </div>
       </section>
 
-      <div className="flex items-center gap-4 border-t border-line pt-6">
+      <div className="flex items-center gap-4 border-t border-border pt-6">
         <button
           type="submit"
           disabled={saveStatus.kind === "saving"}
-          className="rounded bg-accent px-5 py-2.5 text-sm font-medium text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+          className="rounded bg-accent px-5 py-2.5 text-sm font-medium text-accent-ink hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {saveStatus.kind === "saving" ? "Guardando…" : "Guardar configuración"}
         </button>

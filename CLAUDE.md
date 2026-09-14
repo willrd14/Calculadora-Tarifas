@@ -6,44 +6,52 @@ Contexto de proyecto para Claude Code. Ver el plan completo en
 ## Estado actual
 
 **Rediseño de la UI de la app** (pedido de Williams, no es una fase del
-PRD — el PRD no especifica look & feel). Antes usaba la paleta gris
-genérica por defecto de Tailwind; ahora usa el mismo sistema visual que
-`Template/Main.dc.html` (el PDF), para que la app y el documento que
-produce se sientan como una sola cosa.
+PRD — el PRD no especifica look & feel).
 
-- `src/index.css`: define los tokens vía `@theme` de Tailwind 4 —
-  `--font-display` (Space Grotesk 700), `--font-sans` (IBM Plex Sans
-  400/500/600), `--font-mono` (Roboto Mono 400/500 — **no** IBM Plex Mono;
-  ese bug era específico de `pdfkit`/`fontkit` al generar el PDF, no afecta
-  al navegador/WebView, pero se usa Roboto Mono en ambos lados para que se
-  vea igual), y los colores (`--color-paper/panel/line/ink/ink-soft/
-  ink-faint/ink-body/accent/success/danger`) — mismos hex que el PDF.
-  Las fuentes se importan de los mismos paquetes `@fontsource/*` que ya
-  estaban instalados para el PDF, vía sus CSS `latin-*.css` (usa woff2 en
-  el navegador sin problema — el bug de fontkit no aplica aquí).
-- `src/components/FormField.tsx`: `inputClassName` y el nuevo
-  `SectionHeading` (mayúsculas + mono + `ink-faint`, mismo tratamiento que
-  las etiquetas "CLIENTE"/"PROYECTO" del PDF) — reutilizado en todos los
-  formularios para no repetir estilos.
-- `src/app/App.tsx`: barra de acento de 6px en la parte superior de toda la
-  ventana (igual que el PDF), header con marca en `font-display`, y las
-  pestañas pasaron de botones tipo "panel admin" a un nav subrayado
-  (borde inferior en `accent` para la pestaña activa).
-- `src/components/QuotePreview.tsx`: el total ahora es el momento
-  destacado — `font-display` grande en `accent`, igual tratamiento
-  tipográfico que el "TOTAL" del PDF; los montos de la lista van en
-  `font-mono`.
-- `QuoteItemsField.tsx` / `AdditionalChargesField.tsx` /
-  `HistoryList.tsx` / `ClientsPage.tsx` / `SettingsPage.tsx`: mismo
-  vocabulario visual (bordes `line`, fondos `paper`/`panel`, botones en
-  `accent`, "Quitar"/"Eliminar" en `danger`, números en `font-mono`,
-  encabezados de tabla en mayúsculas mono como el PDF).
-- **No se pudo verificar visualmente con screenshot** — Claude-in-Chrome no
-  conectó en este entorno (dos intentos). Se validó indirectamente:
-  `npm run build` limpio, y se confirmó en el CSS compilado que las clases
-  (`bg-accent`, `font-display`, `text-ink-soft`, etc.) y sus valores hex
-  correctos se generaron bien desde el `@theme`. **Falta que Williams la
-  vea corriendo y confirme que se ve bien.**
+Primer intento: le di a la app el mismo sistema visual que el PDF (Space
+Grotesk/IBM Plex Sans/Roboto Mono, paleta papel cálido). **Williams lo
+rechazó explícitamente**: la UI de la app y el PDF son dos cosas
+distintas y deben tener cada una su propio estilo — la app no debe
+parecerse al documento que produce. Se rehizo desde cero con una
+identidad propia:
+
+- **Concepto:** "calculadora de terminal" — la app es la herramienta de
+  trabajo de un desarrollador (Williams), no el documento que le llega al
+  cliente. Fondo oscuro tipo terminal/editor de código, un solo acento
+  ámbar (evoca tanto una calculadora como un monitor de fósforo), y **una
+  sola tipografía monoespaciada en toda la UI** (JetBrains Mono — distinta
+  a las 3 fuentes del PDF a propósito).
+- `src/index.css`: tokens vía `@theme` de Tailwind 4 — `--font-mono`
+  (JetBrains Mono 400/500/600/700, único font-family de la app) y colores
+  `--color-bg/surface/surface-raised/well/border/text/text-soft/
+  text-faint/accent/accent-ink/accent-soft/success/danger` (paleta oscura
+  ámbar-sobre-grafito, sin relación con los hex del PDF). El paquete
+  `jetbrains-mono` se instaló solo para esto; Space Grotesk/IBM Plex
+  Sans/Roboto Mono siguen instalados porque los sigue usando el PDF
+  (`features/pdf/fonts.ts`) — son sistemas de fuentes completamente
+  separados a propósito.
+- `src/app/App.tsx`: barra superior tipo terminal (tres puntos de color,
+  como los controles de una ventana), marca `$ calculadora-tarifas` en
+  mono, pestañas estilo "tabs de editor de código" (con `-mb-px` para que
+  la pestaña activa se funda con el borde inferior del nav).
+- `src/components/FormField.tsx`: `SectionHeading` ahora es un
+  comentario de código (`// cliente y proyecto`) en vez de una etiqueta en
+  mayúsculas — encaja con la metáfora de editor/terminal.
+- `src/components/QuotePreview.tsx`: el total vive en su propio panel
+  oscuro (`bg-well`) con un halo sutil (`text-shadow`) en ámbar — como el
+  display LED/LCD de una calculadora real. Las etiquetas de la vista
+  previa son `snake_case` (`horas_totales`, `subtotal_items`), como
+  variables de código.
+- `QuoteItemsField.tsx` / `AdditionalChargesField.tsx` / `HistoryList.tsx`
+  / `ClientsPage.tsx` / `SettingsPage.tsx`: mismo vocabulario (bordes
+  `border`, fondos `well`/`surface`, `accent` para acciones primarias,
+  `danger` para "Quitar"/"Eliminar").
+- **Sigue sin poder verificarse con screenshot** — Claude-in-Chrome no
+  conectó en este entorno (varios intentos en total). Validado con
+  `npm run build` + `cargo check` limpios y confirmando en el CSS
+  compilado que las clases nuevas (`bg-accent`, `bg-well`, `text-text-
+  soft`, etc.) se generaron con los valores correctos. **Pendiente que
+  Williams la vea corriendo y confirme.**
 
 **Fase 4 — Configuración: completa** (+ funcionalidad de Clientes, pedida
 por Williams, no estaba en el PRD original).

@@ -59,7 +59,7 @@ export function HistoryList({ onDuplicate }: HistoryListProps) {
   }
 
   if (state.kind === "loading") {
-    return <p className="text-sm text-ink-soft">Cargando historial…</p>;
+    return <p className="text-sm text-text-soft">Cargando historial…</p>;
   }
 
   if (state.kind === "error") {
@@ -68,17 +68,17 @@ export function HistoryList({ onDuplicate }: HistoryListProps) {
 
   if (records.length === 0) {
     return (
-      <p className="text-sm text-ink-soft">
+      <p className="text-sm text-text-soft">
         Todavía no has generado ninguna cotización.
       </p>
     );
   }
 
   return (
-    <div className="overflow-x-auto rounded border border-line bg-paper">
+    <div className="overflow-x-auto rounded border border-border bg-well">
       <table className="w-full min-w-[720px] text-sm">
         <thead>
-          <tr className="border-b border-line bg-panel text-left font-mono text-xs uppercase tracking-wide text-ink-faint">
+          <tr className="border-b border-border bg-surface text-left font-mono text-xs uppercase tracking-wide text-text-faint">
             <th className="px-4 py-3 font-medium">Cliente</th>
             <th className="px-4 py-3 font-medium">Proyecto</th>
             <th className="px-4 py-3 font-medium">Fecha</th>
@@ -89,10 +89,10 @@ export function HistoryList({ onDuplicate }: HistoryListProps) {
         </thead>
         <tbody>
           {records.map((record) => (
-            <tr key={record.id} className="border-b border-line last:border-0">
+            <tr key={record.id} className="border-b border-border last:border-0">
               <td className="px-4 py-3">{record.clientName}</td>
-              <td className="px-4 py-3 text-ink-soft">{record.projectName}</td>
-              <td className="px-4 py-3 font-mono text-ink-soft">
+              <td className="px-4 py-3 text-text-soft">{record.projectName}</td>
+              <td className="px-4 py-3 font-mono text-text-soft">
                 {new Date(record.createdAt).toLocaleDateString("es-DO")}
               </td>
               <td className="px-4 py-3 text-right font-mono font-medium">
@@ -107,7 +107,7 @@ export function HistoryList({ onDuplicate }: HistoryListProps) {
                       event.target.value as QuoteStatus,
                     )
                   }
-                  className="rounded border border-line bg-paper px-2 py-1 text-xs focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+                  className="rounded border border-border bg-well px-2 py-1 text-xs focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
                 >
                   {QUOTE_STATUSES.map((status) => (
                     <option key={status} value={status}>

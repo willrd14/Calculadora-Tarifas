@@ -24,21 +24,21 @@ export function AdditionalChargesField() {
         <button
           type="button"
           onClick={() => append(emptyAdditionalCharge)}
-          className="rounded-full border border-line px-3 py-1 text-xs font-medium text-ink hover:border-accent hover:text-accent"
+          className="rounded-full border border-border px-3 py-1 text-xs font-medium text-text hover:border-accent hover:text-accent"
         >
           + Agregar
         </button>
       </div>
 
       {fields.length === 0 && (
-        <p className="text-sm text-ink-faint">Sin cargos adicionales.</p>
+        <p className="text-sm text-text-faint">Sin cargos adicionales.</p>
       )}
 
       <div className="space-y-3">
         {fields.map((field, index) => (
           <div
             key={field.id}
-            className="grid grid-cols-1 gap-2 rounded border border-line bg-paper p-4 sm:grid-cols-[1fr_auto_auto] sm:items-start"
+            className="grid grid-cols-1 gap-2 rounded border border-border bg-well p-4 sm:grid-cols-[1fr_auto_auto] sm:items-start"
           >
             <FormField
               label="Concepto"
