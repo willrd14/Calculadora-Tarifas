@@ -64,18 +64,18 @@ export function ClientsPage() {
   }
 
   if (state.kind === "loading") {
-    return <p className="text-sm text-neutral-500">Cargando clientes…</p>;
+    return <p className="text-sm text-ink-soft">Cargando clientes…</p>;
   }
 
   if (state.kind === "error") {
-    return <p className="text-sm text-red-600">{state.message}</p>;
+    return <p className="text-sm text-danger">{state.message}</p>;
   }
 
   return (
     <div className="max-w-2xl space-y-6">
       <form
         onSubmit={handleAdd}
-        className="grid grid-cols-1 gap-4 rounded-lg border border-neutral-200 bg-white p-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end"
+        className="grid grid-cols-1 gap-4 rounded border border-line bg-paper p-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end"
       >
         <FormField label="Nombre / Empresa" htmlFor="newClientName">
           <input
@@ -100,42 +100,39 @@ export function ClientsPage() {
         <button
           type="submit"
           disabled={saving || !name.trim()}
-          className="rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-700 disabled:cursor-not-allowed disabled:opacity-60"
+          className="rounded bg-accent px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
         >
           Agregar
         </button>
       </form>
 
       {clients.length === 0 ? (
-        <p className="text-sm text-neutral-500">
+        <p className="text-sm text-ink-soft">
           Todavía no tienes clientes guardados — se agregan solos cada vez
           que generas una cotización.
         </p>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-neutral-200 bg-white">
+        <div className="overflow-x-auto rounded border border-line bg-paper">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-neutral-200 bg-neutral-50 text-left text-xs uppercase tracking-wide text-neutral-500">
-                <th className="px-3 py-2 font-medium">Nombre</th>
-                <th className="px-3 py-2 font-medium">Contacto</th>
-                <th className="px-3 py-2" />
+              <tr className="border-b border-line bg-panel text-left font-mono text-xs uppercase tracking-wide text-ink-faint">
+                <th className="px-4 py-3 font-medium">Nombre</th>
+                <th className="px-4 py-3 font-medium">Contacto</th>
+                <th className="px-4 py-3" />
               </tr>
             </thead>
             <tbody>
               {clients.map((client) => (
-                <tr
-                  key={client.id}
-                  className="border-b border-neutral-100 last:border-0"
-                >
-                  <td className="px-3 py-2">{client.name}</td>
-                  <td className="px-3 py-2 text-neutral-500">
+                <tr key={client.id} className="border-b border-line last:border-0">
+                  <td className="px-4 py-3">{client.name}</td>
+                  <td className="px-4 py-3 text-ink-soft">
                     {client.contact || "—"}
                   </td>
-                  <td className="px-3 py-2 text-right">
+                  <td className="px-4 py-3 text-right">
                     <button
                       type="button"
                       onClick={() => handleDelete(client.id)}
-                      className="text-sm text-red-600 hover:underline"
+                      className="text-sm text-danger hover:opacity-75"
                     >
                       Eliminar
                     </button>

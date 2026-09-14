@@ -8,7 +8,11 @@ import {
   type QuoteFormInput,
   type QuoteFormValues,
 } from "./schema";
-import { FormField, inputClassName } from "../../components/FormField";
+import {
+  FormField,
+  SectionHeading,
+  inputClassName,
+} from "../../components/FormField";
 import { CURRENCIES } from "../../lib/currency";
 import { QuoteItemsField } from "../../components/QuoteItemsField";
 import { AdditionalChargesField } from "../../components/AdditionalChargesField";
@@ -127,8 +131,10 @@ export function QuoteForm({ initialValues }: QuoteFormProps) {
         onSubmit={handleSubmit(onSubmit)}
         className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]"
       >
-        <div className="space-y-6">
-          <section className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="space-y-8">
+          <section className="space-y-4">
+            <SectionHeading>Cliente y proyecto</SectionHeading>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {clients.length > 0 && (
               <FormField
                 label="Cliente guardado"
@@ -215,11 +221,14 @@ export function QuoteForm({ initialValues }: QuoteFormProps) {
                 {...register("description")}
               />
             </FormField>
+            </div>
           </section>
 
           <QuoteItemsField />
 
-          <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <section className="space-y-4">
+            <SectionHeading>Tarifa</SectionHeading>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <FormField
               label="Tarifa por hora"
               htmlFor="hourlyRate"
@@ -264,11 +273,14 @@ export function QuoteForm({ initialValues }: QuoteFormProps) {
                 {...register("discountPercent")}
               />
             </FormField>
+            </div>
           </section>
 
           <AdditionalChargesField />
 
-          <section className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <section className="space-y-4">
+            <SectionHeading>Condiciones</SectionHeading>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <FormField label="Forma de pago" htmlFor="paymentTerms">
               <input
                 id="paymentTerms"
@@ -286,24 +298,25 @@ export function QuoteForm({ initialValues }: QuoteFormProps) {
                 {...register("estimatedDelivery")}
               />
             </FormField>
+            </div>
           </section>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4 border-t border-line pt-6">
             <button
               type="submit"
               disabled={pdfStatus.kind === "generating"}
-              className="rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-700 disabled:cursor-not-allowed disabled:opacity-60"
+              className="rounded bg-accent px-5 py-2.5 text-sm font-medium text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {pdfStatus.kind === "generating" ? "Generando PDF…" : "Generar PDF"}
             </button>
 
             {pdfStatus.kind === "success" && (
-              <p className="text-sm text-green-700">
+              <p className="text-sm text-success">
                 PDF guardado en: {pdfStatus.path}
               </p>
             )}
             {pdfStatus.kind === "error" && (
-              <p className="text-sm text-red-600">{pdfStatus.message}</p>
+              <p className="text-sm text-danger">{pdfStatus.message}</p>
             )}
           </div>
         </div>

@@ -3,7 +3,7 @@ import {
   emptyAdditionalCharge,
   type QuoteFormInput,
 } from "../features/quote/schema";
-import { FormField, inputClassName } from "./FormField";
+import { FormField, SectionHeading, inputClassName } from "./FormField";
 
 /** Lista dinámica de cargos adicionales opcionales (diseño UI, despliegue, urgencia, etc.). */
 export function AdditionalChargesField() {
@@ -18,29 +18,27 @@ export function AdditionalChargesField() {
   });
 
   return (
-    <section>
+    <section className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-neutral-700">
-          Cargos adicionales (opcional)
-        </h2>
+        <SectionHeading>Cargos adicionales (opcional)</SectionHeading>
         <button
           type="button"
           onClick={() => append(emptyAdditionalCharge)}
-          className="text-sm font-medium text-blue-600 hover:underline"
+          className="rounded-full border border-line px-3 py-1 text-xs font-medium text-ink hover:border-accent hover:text-accent"
         >
           + Agregar
         </button>
       </div>
 
       {fields.length === 0 && (
-        <p className="mt-2 text-sm text-neutral-400">Sin cargos adicionales.</p>
+        <p className="text-sm text-ink-faint">Sin cargos adicionales.</p>
       )}
 
-      <div className="mt-2 space-y-3">
+      <div className="space-y-3">
         {fields.map((field, index) => (
           <div
             key={field.id}
-            className="grid grid-cols-1 gap-2 rounded-md border border-neutral-200 p-3 sm:grid-cols-[1fr_auto_auto] sm:items-start"
+            className="grid grid-cols-1 gap-2 rounded border border-line bg-paper p-4 sm:grid-cols-[1fr_auto_auto] sm:items-start"
           >
             <FormField
               label="Concepto"
@@ -65,7 +63,7 @@ export function AdditionalChargesField() {
                 type="number"
                 step="0.01"
                 min="0"
-                className={inputClassName}
+                className={`${inputClassName} font-mono`}
                 {...register(`additionalCharges.${index}.amount`)}
               />
             </FormField>
@@ -73,7 +71,7 @@ export function AdditionalChargesField() {
             <button
               type="button"
               onClick={() => remove(index)}
-              className="text-sm text-red-600 hover:underline sm:mt-6"
+              className="text-sm text-danger hover:opacity-75 sm:mt-6"
             >
               Quitar
             </button>

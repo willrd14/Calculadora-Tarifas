@@ -24,6 +24,13 @@ const ClientsPage = lazy(() =>
 
 type Tab = "quote" | "history" | "clients" | "settings";
 
+const TABS: { id: Tab; label: string }[] = [
+  { id: "quote", label: "Nueva cotización" },
+  { id: "history", label: "Historial" },
+  { id: "clients", label: "Clientes" },
+  { id: "settings", label: "Configuración" },
+];
+
 function App() {
   const [tab, setTab] = useState<Tab>("quote");
   // Cambiar `formKey` fuerza a QuoteForm a remontarse con nuevos
@@ -38,74 +45,55 @@ function App() {
   }
 
   return (
-    <main className="min-h-screen bg-neutral-50 px-4 py-8 text-neutral-900">
-      <div className="mx-auto max-w-5xl">
-        <header className="mb-6 flex flex-wrap items-center justify-between gap-4">
+    <div className="min-h-screen bg-paper text-ink">
+      <div className="h-1.5 bg-accent" />
+
+      <main className="mx-auto max-w-5xl px-4 pb-16 pt-10 sm:px-6">
+        <header className="mb-8 flex flex-wrap items-end justify-between gap-6">
           <div>
-            <h1 className="text-2xl font-semibold">Calculadora de Tarifas</h1>
-            <p className="text-sm text-neutral-500">
-              Arma la cotización del proyecto y revisa el total en tiempo real.
+            <p className="font-mono text-xs text-ink-faint">
+              herramienta de cotización
             </p>
+            <h1 className="font-display text-3xl font-bold tracking-tight">
+              Calculadora de Tarifas
+            </h1>
           </div>
-          <nav className="flex gap-2">
-            <TabButton active={tab === "quote"} onClick={() => setTab("quote")}>
-              Nueva cotización
-            </TabButton>
-            <TabButton
-              active={tab === "history"}
-              onClick={() => setTab("history")}
-            >
-              Historial
-            </TabButton>
-            <TabButton
-              active={tab === "clients"}
-              onClick={() => setTab("clients")}
-            >
-              Clientes
-            </TabButton>
-            <TabButton
-              active={tab === "settings"}
-              onClick={() => setTab("settings")}
-            >
-              Configuración
-            </TabButton>
-          </nav>
+          <p className="max-w-xs text-sm text-ink-soft">
+            Arma la cotización, revisa el total en vivo y genera el PDF listo
+            para enviar.
+          </p>
         </header>
+
+        <nav className="mb-8 flex flex-wrap gap-x-6 gap-y-1 border-b border-line">
+          {TABS.map(({ id, label }) => (
+            <TabButton key={id} active={tab === id} onClick={() => setTab(id)}>
+              {label}
+            </TabButton>
+          ))}
+        </nav>
 
         {tab === "quote" && (
           <QuoteForm key={formKey} initialValues={initialValues} />
         )}
         {tab === "history" && (
-          <Suspense
-            fallback={
-              <p className="text-sm text-neutral-500">Cargando historial…</p>
-            }
-          >
+          <Suspense fallback={<TabFallback>Cargando historial…</TabFallback>}>
             <HistoryList onDuplicate={handleDuplicate} />
           </Suspense>
         )}
         {tab === "clients" && (
-          <Suspense
-            fallback={
-              <p className="text-sm text-neutral-500">Cargando clientes…</p>
-            }
-          >
+          <Suspense fallback={<TabFallback>Cargando clientes…</TabFallback>}>
             <ClientsPage />
           </Suspense>
         )}
         {tab === "settings" && (
           <Suspense
-            fallback={
-              <p className="text-sm text-neutral-500">
-                Cargando configuración…
-              </p>
-            }
+            fallback={<TabFallback>Cargando configuración…</TabFallback>}
           >
             <SettingsPage />
           </Suspense>
         )}
-      </div>
-    </main>
+      </main>
+    </div>
   );
 }
 
@@ -124,13 +112,17 @@ function TabButton({
       onClick={onClick}
       className={
         active
-          ? "rounded-md bg-neutral-900 px-3 py-1.5 text-sm font-medium text-white"
-          : "rounded-md border border-neutral-300 bg-white px-3 py-1.5 text-sm font-medium text-neutral-600 hover:bg-neutral-100"
+          ? "border-b-2 border-accent pb-3 text-sm font-medium text-ink"
+          : "border-b-2 border-transparent pb-3 text-sm font-medium text-ink-soft hover:text-ink"
       }
     >
       {children}
     </button>
   );
+}
+
+function TabFallback({ children }: { children: ReactNode }) {
+  return <p className="text-sm text-ink-soft">{children}</p>;
 }
 
 export default App;

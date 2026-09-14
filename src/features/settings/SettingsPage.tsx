@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FormField, inputClassName } from "../../components/FormField";
+import {
+  FormField,
+  SectionHeading,
+  inputClassName,
+} from "../../components/FormField";
 import { CURRENCIES } from "../../lib/currency";
 import { getSettings, saveSettings } from "./db";
 import {
@@ -75,16 +79,18 @@ export function SettingsPage() {
   }
 
   if (loadStatus.kind === "loading") {
-    return <p className="text-sm text-neutral-500">Cargando configuración…</p>;
+    return <p className="text-sm text-ink-soft">Cargando configuración…</p>;
   }
 
   if (loadStatus.kind === "error") {
-    return <p className="text-sm text-red-600">{loadStatus.message}</p>;
+    return <p className="text-sm text-danger">{loadStatus.message}</p>;
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="max-w-2xl space-y-6">
-      <section className="grid grid-cols-1 gap-4 rounded-lg border border-neutral-200 bg-white p-4 sm:grid-cols-2">
+    <form onSubmit={handleSubmit(onSubmit)} className="max-w-2xl space-y-8">
+      <section className="space-y-4">
+        <SectionHeading>Tarifa y moneda por defecto</SectionHeading>
+        <div className="grid grid-cols-1 gap-4 rounded border border-line bg-paper p-4 sm:grid-cols-2">
         <FormField
           label="Tarifa por hora por defecto"
           htmlFor="hourlyRate"
@@ -113,14 +119,13 @@ export function SettingsPage() {
             ))}
           </select>
         </FormField>
+        </div>
       </section>
 
-      <section className="space-y-4 rounded-lg border border-neutral-200 bg-white p-4">
-        <h2 className="text-sm font-semibold text-neutral-700">
-          Datos del freelancer (aparecen en el PDF)
-        </h2>
+      <section className="space-y-4">
+        <SectionHeading>Datos del freelancer (aparecen en el PDF)</SectionHeading>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 rounded border border-line bg-paper p-4 sm:grid-cols-2">
           <FormField
             label="Nombre completo"
             htmlFor="freelancerName"
@@ -189,20 +194,20 @@ export function SettingsPage() {
         </div>
       </section>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-4 border-t border-line pt-6">
         <button
           type="submit"
           disabled={saveStatus.kind === "saving"}
-          className="rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-700 disabled:cursor-not-allowed disabled:opacity-60"
+          className="rounded bg-accent px-5 py-2.5 text-sm font-medium text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {saveStatus.kind === "saving" ? "Guardando…" : "Guardar configuración"}
         </button>
 
         {saveStatus.kind === "saved" && (
-          <p className="text-sm text-green-700">Guardado.</p>
+          <p className="text-sm text-success">Guardado.</p>
         )}
         {saveStatus.kind === "error" && (
-          <p className="text-sm text-red-600">{saveStatus.message}</p>
+          <p className="text-sm text-danger">{saveStatus.message}</p>
         )}
       </div>
     </form>

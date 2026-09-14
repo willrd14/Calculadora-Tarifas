@@ -22,31 +22,46 @@ export function QuotePreview() {
   });
 
   return (
-    <aside className="h-fit rounded-lg border border-neutral-200 bg-white p-4 shadow-sm lg:sticky lg:top-4">
-      <h2 className="text-sm font-semibold text-neutral-700">Vista previa</h2>
+    <aside className="h-fit overflow-hidden rounded border border-line bg-panel lg:sticky lg:top-6">
+      <div className="h-1 bg-accent" />
+      <div className="p-5">
+        <p className="font-mono text-xs uppercase tracking-wide text-ink-faint">
+          Vista previa
+        </p>
 
-      <dl className="mt-3 space-y-2 text-sm">
-        <Row label="Horas totales" value={result.totalHours.toString()} />
-        <Row
-          label="Subtotal ítems"
-          value={formatCurrency(result.itemsSubtotal, currency)}
-        />
-        <Row
-          label="Cargos adicionales"
-          value={formatCurrency(result.additionalChargesTotal, currency)}
-        />
-        <Row label="Subtotal" value={formatCurrency(result.subtotal, currency)} />
-        <Row
-          label={`Descuento (${Number(discountPercent) || 0}%)`}
-          value={`− ${formatCurrency(result.discountAmount, currency)}`}
-        />
-      </dl>
+        <dl className="mt-4 space-y-2 text-sm">
+          <Row label="Horas totales" value={result.totalHours.toString()} />
+          <Row
+            label="Subtotal ítems"
+            value={formatCurrency(result.itemsSubtotal, currency)}
+          />
+          <Row
+            label="Cargos adicionales"
+            value={formatCurrency(result.additionalChargesTotal, currency)}
+          />
+          <Row
+            label="Subtotal"
+            value={formatCurrency(result.subtotal, currency)}
+          />
+          <Row
+            label={`Descuento (${Number(discountPercent) || 0}%)`}
+            value={`− ${formatCurrency(result.discountAmount, currency)}`}
+          />
+        </dl>
 
-      <div className="mt-3 flex items-center justify-between border-t border-neutral-200 pt-3">
-        <span className="text-sm font-semibold text-neutral-700">Total</span>
-        <span className="text-lg font-bold text-neutral-900">
-          {formatCurrency(result.total, currency)}
-        </span>
+        <div className="mt-4 border-t border-line pt-4">
+          <div className="flex items-baseline justify-between">
+            <span className="text-sm font-semibold uppercase tracking-wide text-ink">
+              Total
+            </span>
+            <span className="font-display text-3xl font-bold text-accent">
+              {formatCurrency(result.total, currency)}
+            </span>
+          </div>
+          <p className="mt-1 text-right font-mono text-xs text-ink-faint">
+            {currency}
+          </p>
+        </div>
       </div>
     </aside>
   );
@@ -54,9 +69,9 @@ export function QuotePreview() {
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between text-neutral-600">
+    <div className="flex items-center justify-between text-ink-soft">
       <span>{label}</span>
-      <span className="font-medium text-neutral-800">{value}</span>
+      <span className="font-mono text-ink">{value}</span>
     </div>
   );
 }

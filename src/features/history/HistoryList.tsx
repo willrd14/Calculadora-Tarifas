@@ -59,49 +59,46 @@ export function HistoryList({ onDuplicate }: HistoryListProps) {
   }
 
   if (state.kind === "loading") {
-    return <p className="text-sm text-neutral-500">Cargando historial…</p>;
+    return <p className="text-sm text-ink-soft">Cargando historial…</p>;
   }
 
   if (state.kind === "error") {
-    return <p className="text-sm text-red-600">{state.message}</p>;
+    return <p className="text-sm text-danger">{state.message}</p>;
   }
 
   if (records.length === 0) {
     return (
-      <p className="text-sm text-neutral-500">
+      <p className="text-sm text-ink-soft">
         Todavía no has generado ninguna cotización.
       </p>
     );
   }
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-neutral-200 bg-white">
+    <div className="overflow-x-auto rounded border border-line bg-paper">
       <table className="w-full min-w-[720px] text-sm">
         <thead>
-          <tr className="border-b border-neutral-200 bg-neutral-50 text-left text-xs uppercase tracking-wide text-neutral-500">
-            <th className="px-3 py-2 font-medium">Cliente</th>
-            <th className="px-3 py-2 font-medium">Proyecto</th>
-            <th className="px-3 py-2 font-medium">Fecha</th>
-            <th className="px-3 py-2 text-right font-medium">Total</th>
-            <th className="px-3 py-2 font-medium">Estado</th>
-            <th className="px-3 py-2" />
+          <tr className="border-b border-line bg-panel text-left font-mono text-xs uppercase tracking-wide text-ink-faint">
+            <th className="px-4 py-3 font-medium">Cliente</th>
+            <th className="px-4 py-3 font-medium">Proyecto</th>
+            <th className="px-4 py-3 font-medium">Fecha</th>
+            <th className="px-4 py-3 text-right font-medium">Total</th>
+            <th className="px-4 py-3 font-medium">Estado</th>
+            <th className="px-4 py-3" />
           </tr>
         </thead>
         <tbody>
           {records.map((record) => (
-            <tr
-              key={record.id}
-              className="border-b border-neutral-100 last:border-0"
-            >
-              <td className="px-3 py-2">{record.clientName}</td>
-              <td className="px-3 py-2">{record.projectName}</td>
-              <td className="px-3 py-2 text-neutral-500">
+            <tr key={record.id} className="border-b border-line last:border-0">
+              <td className="px-4 py-3">{record.clientName}</td>
+              <td className="px-4 py-3 text-ink-soft">{record.projectName}</td>
+              <td className="px-4 py-3 font-mono text-ink-soft">
                 {new Date(record.createdAt).toLocaleDateString("es-DO")}
               </td>
-              <td className="px-3 py-2 text-right font-medium">
+              <td className="px-4 py-3 text-right font-mono font-medium">
                 {formatCurrency(record.total, record.currency as Currency)}
               </td>
-              <td className="px-3 py-2">
+              <td className="px-4 py-3">
                 <select
                   value={record.status}
                   onChange={(event) =>
@@ -110,7 +107,7 @@ export function HistoryList({ onDuplicate }: HistoryListProps) {
                       event.target.value as QuoteStatus,
                     )
                   }
-                  className="rounded-md border border-neutral-300 bg-white px-2 py-1 text-xs"
+                  className="rounded border border-line bg-paper px-2 py-1 text-xs focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
                 >
                   {QUOTE_STATUSES.map((status) => (
                     <option key={status} value={status}>
@@ -119,11 +116,11 @@ export function HistoryList({ onDuplicate }: HistoryListProps) {
                   ))}
                 </select>
               </td>
-              <td className="px-3 py-2 text-right">
+              <td className="px-4 py-3 text-right">
                 <button
                   type="button"
                   onClick={() => onDuplicate(historyRecordToFormValues(record))}
-                  className="text-sm font-medium text-blue-600 hover:underline"
+                  className="text-sm font-medium text-accent hover:opacity-75"
                 >
                   Duplicar
                 </button>

@@ -5,6 +5,46 @@ Contexto de proyecto para Claude Code. Ver el plan completo en
 
 ## Estado actual
 
+**Rediseño de la UI de la app** (pedido de Williams, no es una fase del
+PRD — el PRD no especifica look & feel). Antes usaba la paleta gris
+genérica por defecto de Tailwind; ahora usa el mismo sistema visual que
+`Template/Main.dc.html` (el PDF), para que la app y el documento que
+produce se sientan como una sola cosa.
+
+- `src/index.css`: define los tokens vía `@theme` de Tailwind 4 —
+  `--font-display` (Space Grotesk 700), `--font-sans` (IBM Plex Sans
+  400/500/600), `--font-mono` (Roboto Mono 400/500 — **no** IBM Plex Mono;
+  ese bug era específico de `pdfkit`/`fontkit` al generar el PDF, no afecta
+  al navegador/WebView, pero se usa Roboto Mono en ambos lados para que se
+  vea igual), y los colores (`--color-paper/panel/line/ink/ink-soft/
+  ink-faint/ink-body/accent/success/danger`) — mismos hex que el PDF.
+  Las fuentes se importan de los mismos paquetes `@fontsource/*` que ya
+  estaban instalados para el PDF, vía sus CSS `latin-*.css` (usa woff2 en
+  el navegador sin problema — el bug de fontkit no aplica aquí).
+- `src/components/FormField.tsx`: `inputClassName` y el nuevo
+  `SectionHeading` (mayúsculas + mono + `ink-faint`, mismo tratamiento que
+  las etiquetas "CLIENTE"/"PROYECTO" del PDF) — reutilizado en todos los
+  formularios para no repetir estilos.
+- `src/app/App.tsx`: barra de acento de 6px en la parte superior de toda la
+  ventana (igual que el PDF), header con marca en `font-display`, y las
+  pestañas pasaron de botones tipo "panel admin" a un nav subrayado
+  (borde inferior en `accent` para la pestaña activa).
+- `src/components/QuotePreview.tsx`: el total ahora es el momento
+  destacado — `font-display` grande en `accent`, igual tratamiento
+  tipográfico que el "TOTAL" del PDF; los montos de la lista van en
+  `font-mono`.
+- `QuoteItemsField.tsx` / `AdditionalChargesField.tsx` /
+  `HistoryList.tsx` / `ClientsPage.tsx` / `SettingsPage.tsx`: mismo
+  vocabulario visual (bordes `line`, fondos `paper`/`panel`, botones en
+  `accent`, "Quitar"/"Eliminar" en `danger`, números en `font-mono`,
+  encabezados de tabla en mayúsculas mono como el PDF).
+- **No se pudo verificar visualmente con screenshot** — Claude-in-Chrome no
+  conectó en este entorno (dos intentos). Se validó indirectamente:
+  `npm run build` limpio, y se confirmó en el CSS compilado que las clases
+  (`bg-accent`, `font-display`, `text-ink-soft`, etc.) y sus valores hex
+  correctos se generaron bien desde el `@theme`. **Falta que Williams la
+  vea corriendo y confirme que se ve bien.**
+
 **Fase 4 — Configuración: completa** (+ funcionalidad de Clientes, pedida
 por Williams, no estaba en el PRD original).
 

@@ -1,1 +1,35 @@
 @import "tailwindcss";
+
+/* Mismas tipografías que el PDF (Template/Main.dc.html) — la app y el
+   documento que produce deben sentirse como una sola cosa. */
+@import "@fontsource/space-grotesk/latin-700.css";
+@import "@fontsource/ibm-plex-sans/latin-400.css";
+@import "@fontsource/ibm-plex-sans/latin-500.css";
+@import "@fontsource/ibm-plex-sans/latin-600.css";
+@import "@fontsource/roboto-mono/latin-400.css";
+@import "@fontsource/roboto-mono/latin-500.css";
+
+@theme {
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Roboto Mono", ui-monospace, "SF Mono", monospace;
+
+  /* Paleta de Template/Main.dc.html — papel cálido + un solo acento. */
+  --color-paper: #fdfcfa;
+  --color-panel: #f4f1ea;
+  --color-line: #e5e1d8;
+  --color-ink: #1c1a17;
+  --color-ink-soft: #6b6459;
+  --color-ink-faint: #a39a8b;
+  --color-ink-body: #524c43;
+  --color-accent: #1d4ed8;
+  --color-accent-soft: #eef1fc;
+  --color-success: #2f6f4e;
+  --color-danger: #ac3b2a;
+}
+
+body {
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
