@@ -8,6 +8,7 @@ import {
   type QuoteFormInput,
   type QuoteFormValues,
 } from "./schema";
+import { COMPLEXITY_MULTIPLIERS } from "./complexityMultipliers";
 import {
   FormField,
   SectionHeading,
@@ -273,6 +274,29 @@ export function QuoteForm({ initialValues }: QuoteFormProps) {
                 {...register("discountPercent")}
               />
             </FormField>
+            </div>
+          </section>
+
+          <section className="space-y-4">
+            <SectionHeading>Complejidad adicional</SectionHeading>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              {COMPLEXITY_MULTIPLIERS.map((multiplier) => (
+                <label
+                  key={multiplier.id}
+                  className="flex items-center gap-2 rounded border border-border bg-well px-3 py-2 text-sm text-text-soft has-[:checked]:border-accent has-[:checked]:text-text"
+                >
+                  <input
+                    type="checkbox"
+                    value={multiplier.id}
+                    className="accent-accent"
+                    {...register("complexityMultiplierIds")}
+                  />
+                  {multiplier.label}
+                  <span className="ml-auto font-mono text-xs text-accent">
+                    +{multiplier.percent}%
+                  </span>
+                </label>
+              ))}
             </div>
           </section>
 

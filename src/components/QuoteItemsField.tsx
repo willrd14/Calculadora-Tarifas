@@ -1,5 +1,6 @@
 import type { ChangeEvent } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
+import { PROJECT_ARCHETYPES } from "../features/quote/archetypes";
 import {
   COMPLEXITY_HOURS,
   COMPLEXITY_LEVELS,
@@ -16,22 +17,49 @@ export function QuoteItemsField() {
     setValue,
     formState: { errors },
   } = useFormContext<QuoteFormInput>();
-  const { fields, append, remove } = useFieldArray({ control, name: "items" });
+  const { fields, append, remove, replace } = useFieldArray({
+    control,
+    name: "items",
+  });
 
   const arrayError =
     typeof errors.items?.message === "string" ? errors.items.message : undefined;
 
+  function handleArchetypeChange(event: ChangeEvent<HTMLSelectElement>) {
+    const archetype = PROJECT_ARCHETYPES.find((a) => a.id === event.target.value);
+    if (archetype) {
+      replace(archetype.items);
+    }
+    event.target.value = "";
+  }
+
   return (
     <section className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <SectionHeading>Funcionalidades / módulos</SectionHeading>
-        <button
-          type="button"
-          onClick={() => append(emptyQuoteItem)}
-          className="rounded-full border border-border px-3 py-1 text-xs font-medium text-text hover:border-accent hover:text-accent"
-        >
-          + Agregar
-        </button>
+        <div className="flex items-center gap-2">
+          <select
+            defaultValue=""
+            onChange={handleArchetypeChange}
+            className="rounded border border-border bg-well px-2 py-1 text-xs text-text-soft focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+          >
+            <option value="" disabled>
+              empezar desde plantilla…
+            </option>
+            {PROJECT_ARCHETYPES.map((archetype) => (
+              <option key={archetype.id} value={archetype.id}>
+                {archetype.label}
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            onClick={() => append(emptyQuoteItem)}
+            className="rounded-full border border-border px-3 py-1 text-xs font-medium text-text hover:border-accent hover:text-accent"
+          >
+            + Agregar
+          </button>
+        </div>
       </div>
 
       <div className="space-y-3">

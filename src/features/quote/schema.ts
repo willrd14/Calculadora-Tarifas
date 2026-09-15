@@ -58,6 +58,8 @@ export const quoteFormSchema = z.object({
   description: z.string(),
   items: z.array(quoteItemSchema).min(1, "Agrega al menos una funcionalidad"),
   hourlyRate: z.coerce.number().min(0, "No puede ser negativo"),
+  /** Ids de `COMPLEXITY_MULTIPLIERS` marcados (Kubernetes, compliance, rush, etc.). */
+  complexityMultiplierIds: z.array(z.string()),
   additionalCharges: z.array(additionalChargeSchema),
   discountPercent: z.coerce.number().min(0, "No puede ser negativo").max(100, "Máximo 100%"),
   currency: z.enum(["DOP", "USD"]),
@@ -92,6 +94,7 @@ export const defaultQuoteFormValues: QuoteFormInput = {
   description: "",
   items: [emptyQuoteItem],
   hourlyRate: DEFAULT_HOURLY_RATE,
+  complexityMultiplierIds: [],
   additionalCharges: [],
   discountPercent: 0,
   currency: DEFAULT_CURRENCY,

@@ -4,6 +4,7 @@ import { exists, mkdir, writeFile } from "@tauri-apps/plugin-fs";
 import { calculateQuote } from "../../lib/calculate";
 import { generateQuoteNumber } from "../../lib/quoteNumber";
 import { getSettings, settingsToFreelancerProfile } from "../settings/db";
+import { sumComplexityMultipliers } from "../quote/complexityMultipliers";
 import type { QuoteFormValues } from "../quote/schema";
 import { QuoteDocument } from "./QuoteDocument";
 
@@ -59,6 +60,9 @@ export async function generateAndSaveQuotePdf(
   const { total } = calculateQuote({
     items: quote.items,
     hourlyRate: quote.hourlyRate,
+    complexityMultiplierPercent: sumComplexityMultipliers(
+      quote.complexityMultiplierIds,
+    ),
     additionalCharges: quote.additionalCharges,
     discountPercent: quote.discountPercent,
   });

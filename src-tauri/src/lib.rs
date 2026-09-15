@@ -75,6 +75,15 @@ pub fn run() {
             );",
             kind: MigrationKind::Up,
         },
+        Migration {
+            version: 4,
+            description: "add_complexity_multipliers_to_quotes",
+            // Ids de COMPLEXITY_MULTIPLIERS marcados (Kubernetes, compliance,
+            // rush, etc.), serializados como JSON igual que items_json.
+            // DEFAULT '[]' para que las filas existentes no queden NULL.
+            sql: "ALTER TABLE quotes ADD COLUMN complexity_multiplier_ids_json TEXT NOT NULL DEFAULT '[]';",
+            kind: MigrationKind::Up,
+        },
     ];
 
     tauri::Builder::default()

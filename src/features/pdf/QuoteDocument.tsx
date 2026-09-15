@@ -4,6 +4,10 @@ import { formatCurrency } from "../../lib/currency";
 import { addDays, formatDateDMY } from "../../lib/date";
 import type { FreelancerProfile } from "../settings/db";
 import type { QuoteFormValues } from "../quote/schema";
+import {
+  COMPLEXITY_MULTIPLIERS,
+  sumComplexityMultipliers,
+} from "../quote/complexityMultipliers";
 import { FONT_DISPLAY, FONT_MONO, FONT_SANS, registerPdfFonts } from "./fonts";
 import { QUOTE_VALIDITY_DAYS } from "./quoteConditions";
 
@@ -185,9 +189,16 @@ export function QuoteDocument({
   quoteNumber,
   date,
 }: QuoteDocumentProps) {
+  const complexityMultiplierPercent = sumComplexityMultipliers(
+    quote.complexityMultiplierIds,
+  );
+  const selectedMultipliers = COMPLEXITY_MULTIPLIERS.filter((multiplier) =>
+    quote.complexityMultiplierIds.includes(multiplier.id),
+  );
   const result = calculateQuote({
     items: quote.items,
     hourlyRate: quote.hourlyRate,
+    complexityMultiplierPercent,
     additionalCharges: quote.additionalCharges,
     discountPercent: quote.discountPercent,
   });
@@ -285,17 +296,40 @@ export function QuoteDocument({
             ))}
           </View>
 
+          {selectedMultipliers.length > 0 && (
+            <Text style={styles.itemNote}>
+              Incluye:{" "}
+              {selectedMultipliers
+                .map((m) => `${m.label} (+${m.percent}%)`)
+                .join(", ")}
+            </Text>
+          )}
+
           <View style={styles.totalsBox}>
             <View style={styles.totalsRow}>
-              <Text>Subtotal</Text>
+              <Text>Subtotal mano de obra</Text>
               <Text style={styles.mono}>
-                {formatCurrency(result.itemsSubtotal, quote.currency)}
+                {formatCurrency(result.laborSubtotal, quote.currency)}
               </Text>
             </View>
+            {complexityMultiplierPercent > 0 && (
+              <View style={styles.totalsRow}>
+                <Text>Complejidad (+{complexityMultiplierPercent}%)</Text>
+                <Text style={styles.mono}>
+                  {formatCurrency(result.complexityAmount, quote.currency)}
+                </Text>
+              </View>
+            )}
             <View style={styles.totalsRow}>
               <Text>Cargos adicionales</Text>
               <Text style={styles.mono}>
                 {formatCurrency(result.additionalChargesTotal, quote.currency)}
+              </Text>
+            </View>
+            <View style={styles.totalsRow}>
+              <Text>Subtotal</Text>
+              <Text style={styles.mono}>
+                {formatCurrency(result.subtotal, quote.currency)}
               </Text>
             </View>
             <View style={styles.totalsRow}>

@@ -5,6 +5,49 @@ Contexto de proyecto para Claude Code. Ver el plan completo en
 
 ## Estado actual
 
+**Multiplicadores de complejidad, arquetipos de proyecto y niveles de
+alcance** (fuera del PRD — Williams pegó un PRD ajeno de "DevQuote Pro",
+una herramienta mucho más grande para consultoras de staffing con equipos
+multi-rol, blended rate, app móvil separada, integración CRM, etc. Eso
+**no encaja** con esta app de un solo usuario — se le presentó la
+discrepancia y eligió 3 ideas puntuales, adaptadas a un freelancer solo):
+
+- `src/features/quote/complexityMultipliers.ts`: catálogo fijo
+  (`COMPLEXITY_MULTIPLIERS`) — Kubernetes/cloud +15%, compliance +20%,
+  CI/CD +10%, rush +25%, IA/ML +15%. `sumComplexityMultiplierPercent()`
+  suma los seleccionados.
+- `src/lib/calculate.ts`: `calculateQuote()` ahora aplica el % de
+  multiplicadores **sobre la mano de obra** (`laborSubtotal → itemsSubtotal`),
+  antes de sumar cargos adicionales y aplicar el descuento. Nuevos campos
+  en `QuoteCalculationResult`: `laborSubtotal`, `complexityAmount`.
+- `src/features/quote/schema.ts`: nuevo campo `complexityMultiplierIds:
+  string[]` en el formulario.
+- `QuoteForm.tsx`: sección "Complejidad adicional" con checkboxes (mismo
+  `name` registrado para los 5 — patrón estándar de RHF para arrays de
+  checkboxes).
+- `QuotePreview.tsx` / `QuoteDocument.tsx` (PDF): muestran la línea
+  "Complejidad (+X%)" y, en el PDF, un renglón "Incluye: <lista con
+  nombres y %>" para que el cliente vea qué compone ese recargo.
+- **Migración `version: 4`** en `lib.rs`: `ALTER TABLE quotes ADD COLUMN
+  complexity_multiplier_ids_json` (`DEFAULT '[]'` para no romper filas
+  viejas). `history/db.ts` actualizado para guardar/leer esa columna.
+- `src/features/quote/archetypes.ts`: `PROJECT_ARCHETYPES` (Web app,
+  Microservicios, App móvil, Data pipeline) — cada uno con una lista de
+  ítems+horas típicas. En `QuoteItemsField.tsx`, un select "empezar desde
+  plantilla…" llama a `replace()` de `useFieldArray` para reemplazar los
+  ítems actuales. Es solo una ayuda de UI — no se guarda en la cotización.
+- `src/features/quote/scopeTiers.ts`: `SCOPE_TIERS` (MVP 40–120h / Core
+  160–320h / Enterprise 320–800h) — botones de referencia en
+  `QuotePreview.tsx` (estado local, no persistido) que comparan las horas
+  totales actuales contra el rango elegido.
+- **Validado** con `npm run build` + `cargo check` limpios, y **en vivo**:
+  la app ya estaba corriendo (`npm run tauri dev`) mientras se hacían
+  estos cambios — Tauri detectó el cambio de `lib.rs` (migración v4),
+  recompiló y reinició solo sin errores/panics (confirmado en el log del
+  proceso), y Vite aplicó el resto por HMR. No se confirmó explícitamente
+  con Williams que el flujo completo (marcar multiplicadores → generar PDF
+  → ver la línea "Incluye:") se vea bien.
+
 **Rediseño de la UI de la app** (pedido de Williams, no es una fase del
 PRD — el PRD no especifica look & feel).
 

@@ -13,6 +13,7 @@ export interface QuoteHistoryRecord {
   projectType: string;
   description: string;
   hourlyRate: number;
+  complexityMultiplierIds: string[];
   currency: string;
   discountPercent: number;
   paymentTerms: string;
@@ -37,8 +38,9 @@ export async function saveQuoteToHistory(params: {
     `INSERT INTO quotes (
       id, created_at, client_name, client_contact, project_name, project_type,
       description, hourly_rate, currency, discount_percent, payment_terms,
-      estimated_delivery, items_json, additional_charges_json, total, pdf_path, status
-    ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)`,
+      estimated_delivery, items_json, additional_charges_json, total, pdf_path,
+      status, complexity_multiplier_ids_json
+    ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)`,
     [
       id,
       new Date().toISOString(),
@@ -57,6 +59,7 @@ export async function saveQuoteToHistory(params: {
       total,
       pdfPath,
       "Enviada" satisfies QuoteStatus,
+      JSON.stringify(quote.complexityMultiplierIds),
     ],
   );
 }
@@ -94,6 +97,7 @@ export function historyRecordToFormValues(
     description: record.description,
     items: record.items,
     hourlyRate: record.hourlyRate,
+    complexityMultiplierIds: record.complexityMultiplierIds,
     additionalCharges: record.additionalCharges,
     discountPercent: record.discountPercent,
     currency: record.currency as QuoteFormValues["currency"],
@@ -120,6 +124,7 @@ interface RawQuoteRow {
   total: number;
   pdf_path: string;
   status: string;
+  complexity_multiplier_ids_json: string;
 }
 
 function mapRow(row: RawQuoteRow): QuoteHistoryRecord {
@@ -137,6 +142,9 @@ function mapRow(row: RawQuoteRow): QuoteHistoryRecord {
     paymentTerms: row.payment_terms,
     estimatedDelivery: row.estimated_delivery,
     items: JSON.parse(row.items_json),
+    complexityMultiplierIds: JSON.parse(
+      row.complexity_multiplier_ids_json || "[]",
+    ),
     additionalCharges: JSON.parse(row.additional_charges_json),
     total: row.total,
     pdfPath: row.pdf_path,
