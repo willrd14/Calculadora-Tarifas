@@ -29,6 +29,7 @@ export function QuoteItemsField() {
     const archetype = PROJECT_ARCHETYPES.find((a) => a.id === event.target.value);
     if (archetype) {
       replace(archetype.items);
+      setValue("projectType", archetype.projectType);
     }
     event.target.value = "";
   }

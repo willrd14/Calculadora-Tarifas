@@ -31,11 +31,14 @@ discrepancia y eligió 3 ideas puntuales, adaptadas a un freelancer solo):
 - **Migración `version: 4`** en `lib.rs`: `ALTER TABLE quotes ADD COLUMN
   complexity_multiplier_ids_json` (`DEFAULT '[]'` para no romper filas
   viejas). `history/db.ts` actualizado para guardar/leer esa columna.
-- `src/features/quote/archetypes.ts`: `PROJECT_ARCHETYPES` (Web app,
-  Microservicios, App móvil, Data pipeline) — cada uno con una lista de
-  ítems+horas típicas. En `QuoteItemsField.tsx`, un select "empezar desde
-  plantilla…" llama a `replace()` de `useFieldArray` para reemplazar los
-  ítems actuales. Es solo una ayuda de UI — no se guarda en la cotización.
+- `src/features/quote/archetypes.ts`: `PROJECT_ARCHETYPES` — **una
+  plantilla por cada valor de `PROJECT_TYPES`** (menos "Otro"), a pedido
+  explícito de Williams tras ver que solo había 4. Cada una trae
+  `projectType` + una lista de ítems/horas típicas. En
+  `QuoteItemsField.tsx`, el select "empezar desde plantilla…" llama a
+  `replace()` de `useFieldArray` para reemplazar los ítems **y** hace
+  `setValue("projectType", ...)` para que el selector de arriba quede en
+  sincronía. Es solo una ayuda de UI — no se guarda en la cotización.
 - `src/features/quote/scopeTiers.ts`: `SCOPE_TIERS` (MVP 40–120h / Core
   160–320h / Enterprise 320–800h) — botones de referencia en
   `QuotePreview.tsx` (estado local, no persistido) que comparan las horas
