@@ -137,15 +137,4 @@ Calculadora-Tarifas/
   src-tauri/            backend Rust: comandos, plugins, migraciones SQL
   Template/             diseño de referencia del PDF (no se importa en código)
 ```
-
-## 🗺️ Qué sigue
-
-El PRD original define una Fase 5 opcional (plantillas de PDF adicionales,
-más de una moneda activa por cotización, gráficas de cotizaciones enviadas
-vs. aceptadas). Cualquier otra idea para la próxima versión, ver
-`CLAUDE.md` (contexto de desarrollo, no versionado como parte del producto
-pero sí del repo).
-
----
-
 Proyecto personal de [Williams Villavizar](https://portafolio.w-tech.uk).
