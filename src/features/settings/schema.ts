@@ -3,6 +3,8 @@ import { z } from "zod";
 export const settingsFormSchema = z.object({
   hourlyRate: z.coerce.number().min(0, "No puede ser negativo"),
   currency: z.enum(["DOP", "USD"]),
+  /** Cuántos DOP equivalen a 1 USD — usado para convertir la tarifa al cambiar de moneda en el formulario. */
+  exchangeRateDopPerUsd: z.coerce.number().min(0.01, "Debe ser mayor a 0"),
   freelancerName: z.string().min(1, "Ingresa tu nombre"),
   freelancerTagline: z.string(),
   freelancerEmail: z.string(),

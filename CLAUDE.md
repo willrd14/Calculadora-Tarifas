@@ -5,6 +5,39 @@ Contexto de proyecto para Claude Code. Ver el plan completo en
 
 ## Estado actual
 
+**Conversión automática de tarifa por moneda + auto-plantilla por tipo de
+proyecto** (pedido de Williams).
+
+- **Tasa de cambio**: nuevo campo en Configuración,
+  `exchangeRateDopPerUsd` (cuántos DOP equivalen a 1 USD; default 58.83,
+  del ejemplo real de Williams: 1470.75 DOP == 25 USD). Migración
+  `version: 5` en `lib.rs` (`ALTER TABLE settings ADD COLUMN
+  exchange_rate_dop_per_usd`).
+- `QuoteForm.tsx`: al cambiar el select "Moneda", `handleCurrencyChange`
+  convierte `hourlyRate` con esa tasa (÷ al pasar a USD, × al pasar a
+  DOP) — la tasa se carga siempre al montar el formulario (antes solo se
+  cargaban tarifa/moneda por defecto, y solo si no era un duplicado; la
+  tasa ahora se carga en todos los casos porque hace falta para poder
+  convertir sin importar si es cotización nueva o duplicada).
+- **Auto-plantilla por tipo de proyecto**: antes había un select aparte
+  "empezar desde plantilla…" en la sección de Funcionalidades. Ahora, al
+  cambiar "Tipo de proyecto" (en la sección Cliente y proyecto),
+  `handleProjectTypeChange` busca el arquetipo con ese `projectType` y
+  reemplaza los ítems directamente — se quitó el select redundante de
+  `QuoteItemsField.tsx`.
+  - Detalle técnico: `QuoteForm.tsx` necesitaba un `replace()` de
+    `items` pero esa lista la maneja el `useFieldArray` **dentro** de
+    `QuoteItemsField.tsx`. Se resolvió llamando `useFieldArray` una
+    segunda vez en `QuoteForm.tsx` con el mismo `name: "items"` y el
+    mismo `control` — RHF sincroniza automáticamente los `fields` entre
+    instancias que comparten nombre+control, así que no hizo falta
+    subir el estado ni pasar props.
+- **Validado** con `npm run build` + `cargo check` limpios, y en vivo: la
+  app ya estaba corriendo — Tauri detectó la migración v5, recompiló y
+  reinició sin errores, Vite aplicó el resto por HMR. No se confirmó
+  explícitamente con Williams que la conversión de moneda dé el resultado
+  esperado en la práctica (ej. 25 USD → 1470.75 DOP y viceversa).
+
 **Multiplicadores de complejidad, arquetipos de proyecto y niveles de
 alcance** (fuera del PRD — Williams pegó un PRD ajeno de "DevQuote Pro",
 una herramienta mucho más grande para consultoras de staffing con equipos

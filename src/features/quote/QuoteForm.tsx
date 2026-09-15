@@ -1,5 +1,5 @@
 import { useEffect, useState, type ChangeEvent } from "react";
-import { FormProvider, useForm } from "react-hook-form";
+import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   PROJECT_TYPES,
@@ -9,12 +9,13 @@ import {
   type QuoteFormValues,
 } from "./schema";
 import { COMPLEXITY_MULTIPLIERS } from "./complexityMultipliers";
+import { PROJECT_ARCHETYPES } from "./archetypes";
 import {
   FormField,
   SectionHeading,
   inputClassName,
 } from "../../components/FormField";
-import { CURRENCIES } from "../../lib/currency";
+import { CURRENCIES, type Currency } from "../../lib/currency";
 import { QuoteItemsField } from "../../components/QuoteItemsField";
 import { AdditionalChargesField } from "../../components/AdditionalChargesField";
 import { QuotePreview } from "../../components/QuotePreview";
@@ -48,11 +49,21 @@ export function QuoteForm({ initialValues }: QuoteFormProps) {
     register,
     handleSubmit,
     setValue,
+    getValues,
     formState: { errors },
   } = form;
 
+  // Instancia aparte de useFieldArray solo para poder llamar `replace()`
+  // desde el handler de "Tipo de proyecto" — RHF sincroniza automáticamente
+  // los `fields` con la instancia que usa QuoteItemsField (mismo `name`).
+  const { replace: replaceItems } = useFieldArray({
+    control: form.control,
+    name: "items",
+  });
+
   const [pdfStatus, setPdfStatus] = useState<PdfStatus>({ kind: "idle" });
   const [clients, setClients] = useState<Client[]>([]);
+  const [exchangeRate, setExchangeRate] = useState<number | null>(null);
 
   // Clientes guardados, para el selector "Cliente guardado" de abajo.
   useEffect(() => {
@@ -78,18 +89,21 @@ export function QuoteForm({ initialValues }: QuoteFormProps) {
     }
   }
 
-  // En una cotización nueva, precarga la tarifa/moneda de Configuración
-  // (Fase 4) en cuanto cargan — al duplicar una del historial se respeta lo
-  // que ya traía esa cotización, así que no se toca nada en ese caso.
+  // Carga la tasa de cambio siempre (para poder convertir la tarifa si se
+  // cambia de moneda). En una cotización nueva, además precarga la
+  // tarifa/moneda de Configuración — al duplicar una del historial se
+  // respeta lo que ya traía esa cotización, así que esas dos no se tocan.
   useEffect(() => {
-    if (initialValues) return;
     let cancelled = false;
     import("../settings/db")
       .then(({ getSettings }) => getSettings())
       .then((settings) => {
         if (cancelled) return;
-        setValue("hourlyRate", settings.hourlyRate);
-        setValue("currency", settings.currency);
+        setExchangeRate(settings.exchangeRateDopPerUsd);
+        if (!initialValues) {
+          setValue("hourlyRate", settings.hourlyRate);
+          setValue("currency", settings.currency);
+        }
       })
       .catch((error: unknown) => {
         console.error("Error cargando la configuración:", error);
@@ -98,6 +112,29 @@ export function QuoteForm({ initialValues }: QuoteFormProps) {
       cancelled = true;
     };
   }, [initialValues, setValue]);
+
+  // Convierte la tarifa por hora al cambiar de moneda, usando la tasa de
+  // Configuración (ej. 1470.75 DOP == 25 USD con tasa 58.83).
+  function handleCurrencyChange(event: ChangeEvent<HTMLSelectElement>) {
+    if (!exchangeRate) return;
+    const newCurrency = event.target.value as Currency;
+    const currentRate = Number(getValues("hourlyRate"));
+    if (!Number.isFinite(currentRate)) return;
+    const converted =
+      newCurrency === "USD" ? currentRate / exchangeRate : currentRate * exchangeRate;
+    setValue("hourlyRate", Math.round(converted * 100) / 100);
+  }
+
+  // Al elegir un tipo de proyecto, aplica la plantilla de ítems
+  // correspondiente (ver features/quote/archetypes.ts).
+  function handleProjectTypeChange(event: ChangeEvent<HTMLSelectElement>) {
+    const archetype = PROJECT_ARCHETYPES.find(
+      (a) => a.projectType === event.target.value,
+    );
+    if (archetype) {
+      replaceItems(archetype.items);
+    }
+  }
 
   async function onSubmit(values: QuoteFormValues) {
     setPdfStatus({ kind: "generating" });
@@ -199,7 +236,9 @@ export function QuoteForm({ initialValues }: QuoteFormProps) {
               <select
                 id="projectType"
                 className={inputClassName}
-                {...register("projectType")}
+                {...register("projectType", {
+                  onChange: handleProjectTypeChange,
+                })}
               >
                 {PROJECT_TYPES.map((type) => (
                   <option key={type} value={type}>
@@ -207,6 +246,10 @@ export function QuoteForm({ initialValues }: QuoteFormProps) {
                   </option>
                 ))}
               </select>
+              <p className="mt-1 text-xs text-text-faint">
+                Rellena las funcionalidades con una plantilla típica de ese
+                tipo de proyecto.
+              </p>
             </FormField>
 
             <FormField
@@ -249,7 +292,7 @@ export function QuoteForm({ initialValues }: QuoteFormProps) {
               <select
                 id="currency"
                 className={inputClassName}
-                {...register("currency")}
+                {...register("currency", { onChange: handleCurrencyChange })}
               >
                 {CURRENCIES.map((currency) => (
                   <option key={currency} value={currency}>

@@ -119,6 +119,27 @@ export function SettingsPage() {
             ))}
           </select>
         </FormField>
+
+        <FormField
+          label="Tasa de cambio (DOP por 1 USD)"
+          htmlFor="exchangeRateDopPerUsd"
+          error={errors.exchangeRateDopPerUsd?.message}
+          className="sm:col-span-2"
+        >
+          <input
+            id="exchangeRateDopPerUsd"
+            type="number"
+            step="0.01"
+            min="0.01"
+            className={`${inputClassName} font-mono`}
+            {...register("exchangeRateDopPerUsd")}
+          />
+          <p className="mt-1 text-xs text-text-faint">
+            Se usa para convertir la tarifa por hora cuando cambias de
+            moneda en una cotización. Actualízala cuando cambie el tipo de
+            cambio real.
+          </p>
+        </FormField>
         </div>
       </section>
 

@@ -1,6 +1,5 @@
 import type { ChangeEvent } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
-import { PROJECT_ARCHETYPES } from "../features/quote/archetypes";
 import {
   COMPLEXITY_HOURS,
   COMPLEXITY_LEVELS,
@@ -9,7 +8,11 @@ import {
 } from "../features/quote/schema";
 import { FormField, SectionHeading, inputClassName } from "./FormField";
 
-/** Lista dinámica de funcionalidades/módulos de la cotización, con horas por complejidad. */
+/**
+ * Lista dinámica de funcionalidades/módulos de la cotización, con horas
+ * por complejidad. Elegir "Tipo de proyecto" (arriba, en QuoteForm)
+ * rellena esta lista con una plantilla típica — ver features/quote/archetypes.ts.
+ */
 export function QuoteItemsField() {
   const {
     register,
@@ -17,50 +20,22 @@ export function QuoteItemsField() {
     setValue,
     formState: { errors },
   } = useFormContext<QuoteFormInput>();
-  const { fields, append, remove, replace } = useFieldArray({
-    control,
-    name: "items",
-  });
+  const { fields, append, remove } = useFieldArray({ control, name: "items" });
 
   const arrayError =
     typeof errors.items?.message === "string" ? errors.items.message : undefined;
 
-  function handleArchetypeChange(event: ChangeEvent<HTMLSelectElement>) {
-    const archetype = PROJECT_ARCHETYPES.find((a) => a.id === event.target.value);
-    if (archetype) {
-      replace(archetype.items);
-      setValue("projectType", archetype.projectType);
-    }
-    event.target.value = "";
-  }
-
   return (
     <section className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
+      <div className="flex items-center justify-between">
         <SectionHeading>Funcionalidades / módulos</SectionHeading>
-        <div className="flex items-center gap-2">
-          <select
-            defaultValue=""
-            onChange={handleArchetypeChange}
-            className="rounded border border-border bg-well px-2 py-1 text-xs text-text-soft focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
-          >
-            <option value="" disabled>
-              empezar desde plantilla…
-            </option>
-            {PROJECT_ARCHETYPES.map((archetype) => (
-              <option key={archetype.id} value={archetype.id}>
-                {archetype.label}
-              </option>
-            ))}
-          </select>
-          <button
-            type="button"
-            onClick={() => append(emptyQuoteItem)}
-            className="rounded-full border border-border px-3 py-1 text-xs font-medium text-text hover:border-accent hover:text-accent"
-          >
-            + Agregar
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => append(emptyQuoteItem)}
+          className="rounded-full border border-border px-3 py-1 text-xs font-medium text-text hover:border-accent hover:text-accent"
+        >
+          + Agregar
+        </button>
       </div>
 
       <div className="space-y-3">

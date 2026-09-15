@@ -19,6 +19,7 @@ export type AppSettings = SettingsFormValues;
 interface RawSettingsRow {
   hourly_rate: number;
   currency: string;
+  exchange_rate_dop_per_usd: number;
   freelancer_name: string;
   freelancer_tagline: string;
   freelancer_email: string;
@@ -41,6 +42,7 @@ export async function getSettings(): Promise<AppSettings> {
   return {
     hourlyRate: row.hourly_rate,
     currency: row.currency as Currency,
+    exchangeRateDopPerUsd: row.exchange_rate_dop_per_usd,
     freelancerName: row.freelancer_name,
     freelancerTagline: row.freelancer_tagline,
     freelancerEmail: row.freelancer_email,
@@ -57,16 +59,18 @@ export async function saveSettings(settings: AppSettings): Promise<void> {
     `UPDATE settings SET
       hourly_rate = $1,
       currency = $2,
-      freelancer_name = $3,
-      freelancer_tagline = $4,
-      freelancer_email = $5,
-      freelancer_phone = $6,
-      freelancer_portfolio = $7,
-      freelancer_handle = $8
-    WHERE id = $9`,
+      exchange_rate_dop_per_usd = $3,
+      freelancer_name = $4,
+      freelancer_tagline = $5,
+      freelancer_email = $6,
+      freelancer_phone = $7,
+      freelancer_portfolio = $8,
+      freelancer_handle = $9
+    WHERE id = $10`,
     [
       settings.hourlyRate,
       settings.currency,
+      settings.exchangeRateDopPerUsd,
       settings.freelancerName,
       settings.freelancerTagline,
       settings.freelancerEmail,

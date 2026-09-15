@@ -84,6 +84,15 @@ pub fn run() {
             sql: "ALTER TABLE quotes ADD COLUMN complexity_multiplier_ids_json TEXT NOT NULL DEFAULT '[]';",
             kind: MigrationKind::Up,
         },
+        Migration {
+            version: 5,
+            description: "add_exchange_rate_to_settings",
+            // Cuántos DOP equivalen a 1 USD — para convertir la tarifa por
+            // hora al cambiar de moneda en el formulario. Default = el
+            // ejemplo que dio Williams (1470.75 DOP == 25 USD).
+            sql: "ALTER TABLE settings ADD COLUMN exchange_rate_dop_per_usd REAL NOT NULL DEFAULT 58.83;",
+            kind: MigrationKind::Up,
+        },
     ];
 
     tauri::Builder::default()
