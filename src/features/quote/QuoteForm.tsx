@@ -53,13 +53,16 @@ export function QuoteForm({ initialValues }: QuoteFormProps) {
     formState: { errors },
   } = form;
 
-  // Instancia aparte de useFieldArray solo para poder llamar `replace()`
-  // desde el handler de "Tipo de proyecto" — RHF sincroniza automáticamente
-  // los `fields` con la instancia que usa QuoteItemsField (mismo `name`).
-  const { replace: replaceItems } = useFieldArray({
-    control: form.control,
-    name: "items",
-  });
+  // Única instancia de useFieldArray para "items" — se pasa a
+  // QuoteItemsField por props para que "Tipo de proyecto" pueda
+  // reemplazarlos (dos useFieldArray separados para el mismo campo no se
+  // mantenían en sincronía de forma confiable).
+  const {
+    fields: itemFields,
+    append: appendItem,
+    remove: removeItem,
+    replace: replaceItems,
+  } = useFieldArray({ control: form.control, name: "items" });
 
   const [pdfStatus, setPdfStatus] = useState<PdfStatus>({ kind: "idle" });
   const [clients, setClients] = useState<Client[]>([]);
@@ -268,7 +271,11 @@ export function QuoteForm({ initialValues }: QuoteFormProps) {
             </div>
           </section>
 
-          <QuoteItemsField />
+          <QuoteItemsField
+            fields={itemFields}
+            append={appendItem}
+            remove={removeItem}
+          />
 
           <section className="space-y-4">
             <SectionHeading>Tarifa</SectionHeading>

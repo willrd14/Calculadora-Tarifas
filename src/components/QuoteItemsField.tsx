@@ -1,5 +1,6 @@
 import type { ChangeEvent } from "react";
-import { useFieldArray, useFormContext } from "react-hook-form";
+import type { FieldArrayWithId } from "react-hook-form";
+import { useFormContext } from "react-hook-form";
 import {
   COMPLEXITY_HOURS,
   COMPLEXITY_LEVELS,
@@ -8,19 +9,26 @@ import {
 } from "../features/quote/schema";
 import { FormField, SectionHeading, inputClassName } from "./FormField";
 
-/**
- * Lista dinámica de funcionalidades/módulos de la cotización, con horas
- * por complejidad. Elegir "Tipo de proyecto" (arriba, en QuoteForm)
- * rellena esta lista con una plantilla típica — ver features/quote/archetypes.ts.
- */
-export function QuoteItemsField() {
+interface QuoteItemsFieldProps {
+  /**
+   * `fields`/`append`/`remove` vienen de un único `useFieldArray` que vive
+   * en `QuoteForm.tsx` (no aquí) — así "Tipo de proyecto" puede reemplazar
+   * la lista con `replace()` sobre la misma instancia que renderiza estas
+   * filas. Tener dos `useFieldArray` distintos para "items" no se
+   * mantenía en sincronía de forma confiable.
+   */
+  fields: FieldArrayWithId<QuoteFormInput, "items", "id">[];
+  append: (item: QuoteFormInput["items"][number]) => void;
+  remove: (index: number) => void;
+}
+
+/** Lista dinámica de funcionalidades/módulos de la cotización, con horas por complejidad. */
+export function QuoteItemsField({ fields, append, remove }: QuoteItemsFieldProps) {
   const {
     register,
-    control,
     setValue,
     formState: { errors },
   } = useFormContext<QuoteFormInput>();
-  const { fields, append, remove } = useFieldArray({ control, name: "items" });
 
   const arrayError =
     typeof errors.items?.message === "string" ? errors.items.message : undefined;

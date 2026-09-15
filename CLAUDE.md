@@ -25,18 +25,23 @@ proyecto** (pedido de Williams).
   `handleProjectTypeChange` busca el arquetipo con ese `projectType` y
   reemplaza los ítems directamente — se quitó el select redundante de
   `QuoteItemsField.tsx`.
-  - Detalle técnico: `QuoteForm.tsx` necesitaba un `replace()` de
-    `items` pero esa lista la maneja el `useFieldArray` **dentro** de
-    `QuoteItemsField.tsx`. Se resolvió llamando `useFieldArray` una
-    segunda vez en `QuoteForm.tsx` con el mismo `name: "items"` y el
-    mismo `control` — RHF sincroniza automáticamente los `fields` entre
-    instancias que comparten nombre+control, así que no hizo falta
-    subir el estado ni pasar props.
-- **Validado** con `npm run build` + `cargo check` limpios, y en vivo: la
-  app ya estaba corriendo — Tauri detectó la migración v5, recompiló y
-  reinició sin errores, Vite aplicó el resto por HMR. No se confirmó
-  explícitamente con Williams que la conversión de moneda dé el resultado
-  esperado en la práctica (ej. 25 USD → 1470.75 DOP y viceversa).
+  - **Detalle técnico (corregido):** el primer intento llamaba
+    `useFieldArray({ name: "items" })` una segunda vez en `QuoteForm.tsx`
+    (aparte de la que ya tenía `QuoteItemsField.tsx`) asumiendo que RHF
+    sincroniza automáticamente los `fields` entre instancias que
+    comparten nombre+control — **Williams probó y no funcionaba, el
+    `replace()` no se reflejaba en la lista visible.** Se corrigió
+    subiendo la única instancia de `useFieldArray("items")` a
+    `QuoteForm.tsx` y pasando `fields`/`append`/`remove` a
+    `QuoteItemsField` por props (ya no tiene su propio `useFieldArray`).
+    Lección: no asumir que dos `useFieldArray` para el mismo campo se
+    mantienen en sync — una sola instancia como fuente de verdad,
+    compartida por props.
+- **Validado** con `npm run build` + `cargo check` limpios. El fix del
+  `useFieldArray` no se ha vuelto a confirmar en vivo con Williams
+  todavía (sí se había confirmado, y fallaba, la versión anterior). La
+  conversión de moneda tampoco se confirmó explícitamente en la práctica
+  (ej. 25 USD → 1470.75 DOP y viceversa).
 
 **Multiplicadores de complejidad, arquetipos de proyecto y niveles de
 alcance** (fuera del PRD — Williams pegó un PRD ajeno de "DevQuote Pro",
